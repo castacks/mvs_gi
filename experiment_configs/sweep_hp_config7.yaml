@@ -1,0 +1,11 @@
+sweep@exp_name: "dsta_sweep_config7"
+#32I 
+sweep@dist_list: [0.5, 0.77694076,  1.12647449,  1.39806385,  1.66228931,  1.92209016, 2.1913548,   2.46467309,  2.75718748,  3.05675129,  3.37572113,  3.71045734, 4.0606268,   4.43892887,  4.85039183,  5.29536264,  5.78156954,  6.31671082, 6.90808345,  7.57129711,  8.32825577,  9.19776793, 10.2108294,  11.40976115, 12.87013896, 14.70264105, 17.09268621, 20.3710959,  25.1869872,  33.15291897, 49.08892996, 100.0 ]
+fit.model.init_args.volume_loss: sweep_configs/vol_loss.yaml
+#L1 Loss 100% Weighting
+fit.model.init_args.loss_weights: [0.0, 1.0]
+fit.model.init_args.augmentation.init_args: sweep_configs/no_masking.yaml
+fit.model.init_args.feature_extractor: sweep_configs/simple_featext.yaml
+fit.model.init_args.cv_builder: sweep_configs/concat_cvbuilder.yaml
+fit.model.init_args.cv_regulator.init_args.in_chs: 48
+fit.data.init_args.data_dirs.main.batch_size: 4

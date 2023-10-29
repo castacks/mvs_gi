@@ -1,0 +1,22 @@
+class_path: NearFocusDistanceLoss
+init_args:
+  near_loss_func: 
+    class_path: VolumeCrossEntropy
+    init_args:
+      bf: &bf 96
+      dist_list: "sweep@dist_list"
+  near_dist_thresh: &near_thresh 20.0
+  loss_weights: [1.0, 0.1]
+  far_loss_func: 
+    class_path: InBoundsBCEDistanceLoss
+    init_args:
+      dist_regressor:
+        class_path: DistanceRegressorWithFixedCandidates
+        init_args:
+          bf: *bf
+          dist_cands: "sweep@dist_list"
+          interp_scale_factor: 0
+          pre_interp: True
+      far_dist_threshold: 100.0
+      near_dist_threshold: *near_thresh 
+  dist_list: "sweep@dist_list"

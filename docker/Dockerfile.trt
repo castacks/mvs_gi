@@ -1,0 +1,10 @@
+FROM nvcr.io/nvidia/pytorch:20.09-py3
+
+WORKDIR /tmp
+
+RUN apt-get update
+
+COPY requirements_jetson.txt /tmp/requirements.txt
+RUN pip3 install -r requirements.txt
+
+WORKDIR /workspace

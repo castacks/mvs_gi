@@ -1,0 +1,9 @@
+sweep@exp_name: "dsta_sweep_config14"
+#16LIBS
+sweep@dist_list: [0.5, 0.5041805, 0.51275478, 0.52617732, 0.54520672, 0.5710207, 0.6054185, 0.65118298, 0.71275837, 0.79760718, 0.91918805, 1.10436223, 1.41542817, 2.0370056, 3.8647343, 100.0]
+fit.model.init_args.volume_loss: sweep_configs/vol_loss.yaml
+#Vol Loss 100% Weighting
+fit.model.init_args.loss_weights: [1.0, 0.0]
+fit.model.init_args.feature_extractor: sweep_configs/sphereconv_featext.yaml
+fit.model.init_args.augmentation.init_args: sweep_configs/random_masking.yaml
+fit.model.init_args.cv_builder: sweep_configs/std_cvbuilder.yaml

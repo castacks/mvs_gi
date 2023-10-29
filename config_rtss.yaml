@@ -1,0 +1,98 @@
+---
+validate:
+  data:
+    class_path: MVSLocalDataModule
+    init_args:
+      bf: &bf 96
+      dist_list: [0.5, 100]
+      data_dirs: &data_names
+        main: # Code always expects "main" dataset
+          path: "/dataset/"
+          print_imgs: True
+          print_imgs_batch_freq: 100
+          compute_metrics: True
+
+          rgb_to_stitch_resolution: [1024, 1024]
+          panorama_resolution: [640, 320]
+
+          batch_size: 1
+          type: "synthetic"
+          keep_raw_imgs: True
+          warp_linear_to_double: True
+        per_env: # This name is what will be searched at the data_partition.json at the path
+          path: "/dataset/"
+          print_imgs: True
+          print_imgs_batch_freq: 1
+          compute_metrics: False
+
+          rgb_to_stitch_resolution: [1024, 1024]
+          panorama_resolution: [640, 320]
+
+          batch_size: 1
+          type: "synthetic"
+          keep_raw_imgs: True
+          warp_linear_to_double: True
+        real_data: # Code always expects "main" dataset
+          path: "/dataset/20230328_Hawkins/"
+          print_imgs: True
+          print_imgs_batch_freq: 1
+          compute_metrics: False
+
+          rgb_to_stitch_resolution: [1224, 1028]
+          panorama_resolution: [640, 320]
+
+          batch_size: 1
+          num_samples: 50
+          step_size: 5
+          order: [2, 0, 1]
+          type: "real"
+          keep_raw_imgs: True
+          warp_linear_to_double: False
+      shuffle_train: True
+      shuffle_val: False
+      num_workers: 16
+
+  model:
+    class_path: eval_wrappers.rtss_wrapper.RealTimeSphereSweepWrapper
+    init_args:
+      val_loader_names: *data_names
+
+      dist_range: [0.5, 100.0]
+      candidate_count: 32
+      matching_resolution: [1024, 1024]
+      reference_indices: [ 0 ]
+      sigma_i: 10.0
+      sigma_s: 25.0
+
+      validation_metrics:
+        ssim:
+          class_path: SSIMMetric
+          init_args:
+            bf: *bf
+            dist_list: "sweep@dist_list"
+        rmse:
+          class_path: RMSEMetric
+          init_args:
+            bf: *bf
+            dist_list: "sweep@dist_list"
+        mae:
+          class_path: MAEMetric
+          init_args:
+            bf: *bf
+            dist_list: "sweep@dist_list"
+      
+      visualization_range: [0.5, 100]  
+
+  trainer:
+    accelerator: gpu
+    num_nodes: 1
+    strategy: ddp
+    max_epochs: 1
+    logger:
+      class_path: WandbLogger
+      init_args:
+        project: dsta-mvs-sweep
+        name: rtss_baseline
+        log_model: all
+        save_dir: wandb_logs
+    callbacks: []

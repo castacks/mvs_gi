@@ -1,0 +1,31 @@
+# The content of this file should be exactly the same with dataset_no_surrogate_inputs.yaml
+main: # Code always expects "main" dataset
+  path: "/dataset/"
+  print_imgs: True
+  print_warped_inputs: False
+  print_imgs_batch_freq: 150
+  compute_metrics: True
+  batch_size: 4
+  type: "synthetic"
+  max_length: 0
+per_env: # This name is what will be searched at the data_partition.json at the path
+  path: "/dataset/"
+  print_imgs: True
+  print_warped_inputs: False
+  print_imgs_batch_freq: 1
+  compute_metrics: False
+  batch_size: 1
+  type: "synthetic"
+  max_length: 0
+real_data: # Code always expects "main" dataset
+  path: "/dataset/20230328_Hawkins/"
+  print_imgs: True
+  print_warped_inputs: False
+  print_imgs_batch_freq: 1
+  compute_metrics: False
+  batch_size: 1
+  num_samples: 25
+  step_size: 10
+  order: [2, 0, 1]
+  type: "real"
+  

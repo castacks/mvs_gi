@@ -1,0 +1,13 @@
+# Baseline model with large cv regulator and fisheye inputs.
+sweep@exp_name: "dsta_sweep_config104"
+#16L
+sweep@dist_list: [0.5, 0.5355230274901821, 0.5764796310530361, 0.6242197253433209, 0.6805807622504538, 0.7481296758104738, 0.8305647840531561, 0.9334163036714376, 1.0653409090909092, 1.240694789081886, 1.4851485148514851, 1.8495684340320593, 2.450980392156863, 3.6319612590799033, 7.009345794392524, 100.0]
+fit.data: sweep_configs/dataset_no_surrogate_inputs.yaml
+fit.model.init_args.val_loader_names: sweep_configs/duplicated_val_loader_names.yaml
+fit.model.init_args.volume_loss: sweep_configs/vol_loss.yaml
+#L1 Loss 100% Weighting
+fit.model.init_args.loss_weights: [0.0, 1.0]
+fit.model.init_args.feature_extractor: sweep_configs/simple_featext.yaml
+fit.model.init_args.augmentation.init_args: sweep_configs/no_masking.yaml
+fit.model.init_args.cv_builder: sweep_configs/concat_cvbuilder.yaml
+fit.model.init_args.cv_regulator: sweep_configs/cv_regulator_unet_in48ch_fint96ch.yaml

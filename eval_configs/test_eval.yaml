@@ -1,0 +1,6 @@
+# New name.
+sweep@exp_name: "dsta_sweep_config12_val_test"
+
+fit.data.init_args.data_dirs.main.batch_size: 1
+fit.data.init_args.num_workers: 2
+fit.data.init_args.shuffle_train: false

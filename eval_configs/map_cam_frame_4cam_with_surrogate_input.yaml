@@ -1,0 +1,6 @@
+cam0: "cif0s"
+cam1: "cif1s"
+cam2: "cif2s"
+cam3: "cif3s"
+rig:  "rifs"
+cv:   "cv"

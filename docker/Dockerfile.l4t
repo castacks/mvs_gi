@@ -1,0 +1,18 @@
+# FROM nvcr.io/nvidia/l4t-pytorch:r32.5.0-pth1.7-py3
+FROM nvcr.io/nvidia/l4t-ml:r32.5.0-py3
+
+WORKDIR /tmp
+
+RUN apt-get update
+
+RUN pip3 install protobuf==3.19.6
+
+RUN wget --no-check-certificate -O onnxruntime_gpu-1.8.0-cp36-cp36m-linux_aarch64.whl https://nvidia.box.com/shared/static/bfs688apyvor4eo8sf3y1oqtnarwafww.whl
+RUN pip3 install onnxruntime_gpu-1.8.0-cp36-cp36m-linux_aarch64.whl
+
+RUN apt-get -y install python3-tk
+
+COPY requirements_jetson.txt /tmp/requirements.txt
+RUN pip3 install -r requirements.txt
+
+WORKDIR /workspace

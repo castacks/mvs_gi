@@ -1,0 +1,14 @@
+colorama
+kornia
+networkx
+onnx_graphsurgeon
+onnxconverter_common==1.12.2
+onnxmltools==1.11.1
+polygraphy
+pycuda
+pyquaternion
+pyyaml
+scipy
+torchmetrics
+tqdm
+typing-extensions>=4.0.0

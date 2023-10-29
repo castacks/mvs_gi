@@ -1,0 +1,63 @@
+class_path: MVSLocalDataModule
+init_args:
+  bf: &bf 96
+  dist_list: "sweep@dist_list"
+  data_dirs: &data_names
+    main: # Code always expects "main" dataset
+      path: "/dataset/"
+      print_imgs: True
+      print_warped_inputs: False
+      print_imgs_batch_freq: 150
+      compute_metrics: True
+      batch_size: 4
+      type: "synthetic"
+      max_length: 0
+    per_env: # This name is what will be searched at the data_partition.json at the path
+      path: "/dataset/"
+      print_imgs: True
+      print_warped_inputs: False
+      print_imgs_batch_freq: 1
+      compute_metrics: False
+      batch_size: 1
+      type: "synthetic"
+      max_length: 0
+    real_data: # Code always expects "main" dataset
+      path: "/dataset/20230328_Hawkins/"
+      print_imgs: True
+      print_warped_inputs: False
+      print_imgs_batch_freq: 1
+      compute_metrics: False
+      batch_size: 1
+      num_samples: 25
+      step_size: 10
+      order: [2, 0, 1]
+      type: "real"
+  shuffle_train: True
+  shuffle_val: False
+  num_workers: 16
+  conf_additional_camera_model:
+    cv: 
+      type: "Equirectangular"
+      shape_struct:
+        H: 80
+        W: 320
+      latitude_span: [ -1.5707963267948966, 0 ]
+      open_span: False
+      in_to_tensor: True 
+      out_to_numpy: False
+  conf_map_surrogate_camera_model:
+    rig:
+      type: "Equirectangular"
+      shape_struct:
+        H: 160
+        W: 640
+      latitude_span: [ -1.5707963267948966, 0 ]
+      open_span: False
+      in_to_tensor: True 
+      out_to_numpy: False
+  map_camera_frame:
+    cam0: "cif0"
+    cam1: "cif1"
+    cam2: "cif2"
+    rig:  "rifs"
+    cv:   "cv"

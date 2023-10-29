@@ -1,0 +1,9 @@
+class_path: MaskedSmoothL1Loss
+init_args:
+  dist_regressor: 
+    class_path: DistanceRegressorWithFixedCandidates
+    init_args:
+      bf: &bf 96
+      dist_cands: "sweep@dist_list"
+      interp_scale_factor: 0
+      pre_interp: True

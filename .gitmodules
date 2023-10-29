@@ -1,0 +1,11 @@
+[submodule "dsta_mvs/mvs_utils"]
+	path = dsta_mvs/mvs_utils
+	url = git@github.com:castacks/mvs_utils.git
+	branch = main
+[submodule "dsta_mvs/image_sampler"]
+	path = dsta_mvs/image_sampler
+	url = git@github.com:castacks/image_sampler.git
+	branch = main
+[submodule "eval_wrappers/dsta_sphere_stereo_cvpr2021"]
+	path = eval_wrappers/dsta_sphere_stereo_cvpr2021
+	url = https://github.com/castacks/dsta-sphere-stereo-cvpr2021.git

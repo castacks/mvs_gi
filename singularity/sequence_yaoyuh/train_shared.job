@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#echo commands to stdout
+set -x
+
+# create sigularity container
+SIF="${PROJECT}/../yaoyuh/singularity/yaoyuh_ngc_x86_dsta_22.08_11_lightning_for_mvs.sif"
+
+#Get Job ID
+TASK_ID=$1
+RESUME_ID=$2
+
+# The --env-file may not work. So need to set the WANDB_API_KEY globally after calling this script.
+S_EXEC="\
+	singularity exec \
+	-B ${PROJECT}/../cpulling/DSTA_MVS_Dataset/:/dataset/ \
+	-B ${PROJECT}/../cpulling/DSTA_MVS_Dataset/dsta_mvs_lightning_yaoyuh/:/workspace/ \
+	-H ${PROJECT}/WD/dsta/temp_home \
+	--nv \
+	${SIF}"
+
+# implement the job in the container
+SCRIPT=train_shared.sh
+${S_EXEC} 'bash' ${SCRIPT} ${TASK_ID} ${RESUME_ID}
+
+# END

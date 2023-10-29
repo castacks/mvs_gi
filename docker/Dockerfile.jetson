@@ -1,0 +1,14 @@
+FROM nvcr.io/nvidia/l4t-ml:r32.7.1-py3
+
+RUN apt-get update
+RUN apt-get -y install python3-tk
+
+WORKDIR /tmp
+
+RUN wget --no-check-certificate -O onnxruntime_gpu-1.11.0-cp36-cp36m-linux_aarch64.whl https://nvidia.box.com/shared/static/pmsqsiaw4pg9qrbeckcbymho6c01jj4z.whl
+RUN pip3 install onnxruntime_gpu-1.11.0-cp36-cp36m-linux_aarch64.whl
+
+COPY requirements_jetson.txt /tmp/requirements.txt
+RUN pip3 install -r requirements.txt --extra-index-url https://pypi.ngc.nvidia.com
+
+WORKDIR /workspace

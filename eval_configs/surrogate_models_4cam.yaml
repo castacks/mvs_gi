@@ -1,0 +1,45 @@
+cam0: 
+  type: "Equirectangular"
+  shape_struct:
+    H: 512
+    W: 2048
+  latitude_span: "sweep@pi_latitude_span"
+  open_span: False
+  in_to_tensor: True 
+  out_to_numpy: False
+cam1: 
+  type: "Equirectangular"
+  shape_struct:
+    H: 512
+    W: 2048
+  latitude_span: "sweep@pi_latitude_span"
+  open_span: False
+  in_to_tensor: True 
+  out_to_numpy: False
+cam2: 
+  type: "Equirectangular"
+  shape_struct:
+    H: 512
+    W: 2048
+  latitude_span: "sweep@pi_latitude_span"
+  open_span: False
+  in_to_tensor: True 
+  out_to_numpy: False
+cam3: 
+  type: "Equirectangular"
+  shape_struct:
+    H: 512
+    W: 2048
+  latitude_span: "sweep@pi_latitude_span"
+  open_span: False
+  in_to_tensor: True 
+  out_to_numpy: False
+rig:
+  type: "Equirectangular"
+  shape_struct:
+    H: 160
+    W: 640
+  latitude_span: "sweep@pi_latitude_span"
+  open_span: False
+  in_to_tensor: True 
+  out_to_numpy: False

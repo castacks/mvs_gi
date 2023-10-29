@@ -1,0 +1,12 @@
+class_path: UNetCostVolumeRegulatorBase
+init_args:
+  in_chs: 16
+  f_int_chs: 96
+  final_chs: 1
+  u_depth: 3
+  blk_width: 4
+  stage_factor: 2
+  cost_k_sz: 3
+  deconv_k_sz: 3
+  norm_type: "batch"
+  relu_type: "leaky"

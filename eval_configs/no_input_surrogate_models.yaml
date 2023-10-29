@@ -1,0 +1,9 @@
+rig:
+  type: "Equirectangular"
+  shape_struct:
+    H: 160
+    W: 640
+  latitude_span: "sweep@pi_latitude_span"
+  open_span: False
+  in_to_tensor: True 
+  out_to_numpy: False

@@ -1,0 +1,26 @@
+class_path: dsta_mvs.support.datamodule.mvs_datamodule.MVSLocalDataModule
+init_args:
+  bf: &bf 96
+  dist_list: "sweep@dist_list"
+  data_dirs: &data_names
+    main: # Code always expects "main" dataset
+      path: "/dataset/"
+      print_imgs: True
+      print_imgs_batch_freq: 150
+      compute_metrics: True
+      batch_size: 1
+      type: "synthetic"
+    per_env: # This name is what will be searched at the data_partition.json at the path
+      path: "/dataset/"
+      print_imgs: True
+      print_imgs_batch_freq: 1
+      compute_metrics: False
+      batch_size: 1
+      type: "synthetic"
+  shuffle_train: False
+  shuffle_val: False
+  num_workers: 2
+  conf_additional_camera_model:
+    cv: "eval_configs/cam_model_cv.yaml"
+  conf_map_surrogate_camera_model: "eval_configs/surrogate_models_3cam.yaml"
+  map_camera_frame: "eval_configs/map_cam_frame_3cam_with_surrogate_input.yaml"
