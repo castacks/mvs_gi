@@ -80,7 +80,7 @@ unzip mvs_gi_code_release_validation_samples.zip -d mvs_gi_code_release_validati
 ## Local configuration
 
 After unzip the sample workspace. The user need to copy the following two files to a case 
-directory. Go to the CR_EV004 folder then do
+directory. Go to the CR_EV004 folder in the sample workspace that we just downloaded. Then do
 
 ```bash
 cp <path to code>/samples/offline_validation/CR_EV004/*.sh ./
