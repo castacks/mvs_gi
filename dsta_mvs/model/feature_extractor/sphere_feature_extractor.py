@@ -5,8 +5,6 @@ from torch import nn, Tensor
 from ..common import RELU_TYPE, NORM2D_TYPE
 from ..common import common_modules as cm
 
-from ..pos_encoding import PositionalEncoder
-
 class SphereEquirectFeatExtraction(nn.Module):
     def __init__(
         self,
@@ -84,45 +82,6 @@ class SphereEquirectFeatExtraction(nn.Module):
         x = self.first(x)
         x = self.blks(x)
         return self.final_layer(x)
-    
-
-class SphereEquirectFeatExtractionWPosEncoding(
-    SphereEquirectFeatExtraction
-):
-    def __init__(
-        self,
-        in_size: Tuple[int, int],
-        chs: int = 8,
-        k_sz: int = 3,
-        layers: Sequence[int] = [5, 10],
-        norm_type: str = 'batch',
-        relu_type: str = 'leaky',
-        c_dim: int = 2,
-        coord_dims: Tuple[int, int] = None,
-        coord_encoder: nn.Module = None
-    ):
-
-        super().__init__(
-            in_size=in_size,
-            in_chs=3 + coord_encoder.out_dim*len(coord_dims),
-            chs=chs,
-            k_sz=k_sz,
-            layers=layers,
-            norm_type=norm_type,
-            relu_type=relu_type
-        )
-
-        self.pos_encoder = PositionalEncoder(
-            c_dim, coord_dims, coord_encoder
-        )
-
-
-    def forward(self, x:Tensor):
-        x = self.pos_encoder(x)
-        x = self.first(x)
-        x = self.blks(x)
-        return self.final_layer(x)
-    
 
 class SphereEquirectFeatExtractionWFeatEncoding(
     SphereEquirectFeatExtraction
