@@ -14,7 +14,7 @@ echo "-----------------"
 cd /workspace
 
 # This is Yaoyu's key.
-export WANDB_API_KEY="68c672db64b5d0269500f1e75b9b93de457d0512"
+export WANDB_API_KEY=""
 
 python3 main_sweep.py \
 	-bc config_sweepbase_4gpu.yaml \

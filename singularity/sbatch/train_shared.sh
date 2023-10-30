@@ -10,7 +10,7 @@ echo "-----------------"
 
 cd /workspace
 
-export WANDB_API_KEY="6e03853ffa33eaa006ec3b26234fdeed1e2e5692"
+export WANDB_API_KEY=""
 
 python3 main_sweep.py -bc config_sweepbase_4gpu.yaml -c experiment_configs/sweep_hp_config${TASK_ID}.yaml -pm ${TASK_ID}
 #python3 main_sweep.py -bc config_ckpt_reloading.yaml -c sweep_hp_blank.yaml

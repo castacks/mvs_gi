@@ -2,7 +2,7 @@
 
 singularity instance start \
     --env-file ${PROJECT}/WD/dsta/dsta_mvs_lightning_code/api_key_local.env \
-    --env WANDB_API_KEY=68c672db64b5d0269500f1e75b9b93de457d0512 \
+    --env WANDB_API_KEY= \
     --nv \
     -B ${PROJECT}/../shared/dsta/debug_dataset_20230630/:/dataset/ \
     -B ${PROJECT}/WD/dsta/dsta_mvs_lightning_code/:/workspace/ \

@@ -181,25 +181,3 @@ class InverseMetricWrapper(nn.Module):
             metric_score = 0.0
         
         return metric_score
-    
-class LatitudeCropMetricWrapper(nn.Module):
-    def __init__(
-        self,
-        metric: nn.Module,
-        lat_rng: Tuple[float, float]      
-    ):
-        super().__init__()
-        self.metric = metric
-        self.lat_rng = lat_rng
-
-    def forward(self, preds: Tensor, target: Tensor, valid_mask: Tensor=None) -> Tensor:
-        # TODO: This function is not finished! Do not use.
-        assert False, "LatitudeCropMetricWrapper is not finished! Do not use. "
-        # TODO: need to debug the shape.
-        B, C, H, W = preds.shape
-        v_min, v_max = [H*(1-torch.sin(lat)) for lat in self.lat_rng]
-
-        pred_cropped = preds[:, :, v_min:v_max, ...]
-        target_cropped = target[:, :, v_min:v_max, ...]
-
-        return self.metric(pred_cropped, target_cropped)
