@@ -24,7 +24,7 @@ git submodule update --init --recursive
 Run the following command to get the sample data from our data server.
 
 ```bash
-wget -O sample_validation_data.zip https://airlab-share.andrew.cmu.edu:8081/mvg_gi/code_release_202310_data.zip 
+wget -O sample_validation_data.zip https://airlab-share.andrew.cmu.edu:8081/mvs_gi/code_release_202310_data.zip 
 ```
 
 Unzip the downloaded file.
@@ -74,7 +74,7 @@ pre-trained model.
 ```bash
 cd <awesome location for workspaces>
 wget https://airlab-share.andrew.cmu.edu:8081/mvs_gi/mvs_gi_code_release_validation_samples.zip
-unzip mvs_gi_code_release_validation_samples.zip -d mvs_gi_code_release_validation_samples
+unzip mvs_gi_code_release_validation_samples.zip -d ./
 ```
 
 ## Local configuration
