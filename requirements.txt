@@ -4,6 +4,7 @@ cupy-cuda118
 deform_conv2d_onnx_exporter
 graphviz
 ipdb
+jsonargparse
 kornia
 lightning
 matplotlib

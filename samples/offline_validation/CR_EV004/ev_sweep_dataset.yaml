@@ -1,0 +1,10 @@
+# Evaluation name.
+sweep@exp_name: "CR_EV004"
+sweep@main_dataset_print_img_freq: 1
+sweep@main_dataset_step_size: 1
+
+fit.data: "/working_root/config/ev_main_dataset.yaml"
+fit.model.init_args.val_loader_names: "/working_root/config/ev_data_dirs.yaml"
+fit.model.init_args.val_offline_flag: true
+fit.model.init_args.val_custom_step: true
+fit.trainer.callbacks: "callbacks@/working_root/config/ev_trainer_callbacks.yaml"
