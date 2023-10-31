@@ -1,4 +1,4 @@
-class_path: SphereEquirectFeatExtraction
+class_path: dsta_mvs.model.feature_extractor.SphereEquirectFeatExtraction
 init_args:
   in_size: [512, 2048]
   in_chs: 3

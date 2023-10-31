@@ -1,7 +1,7 @@
-class_path: MaskedSmoothL1Loss
+class_path: dsta_mvs.support.loss_function.MaskedSmoothL1Loss
 init_args:
   dist_regressor: 
-    class_path: DistanceRegressorWithFixedCandidates
+    class_path: dsta_mvs.model.distance_regressor.DistanceRegressorWithFixedCandidates
     init_args:
       bf: &bf 96
       dist_cands: "sweep@dist_list"

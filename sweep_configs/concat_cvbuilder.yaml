@@ -1,4 +1,4 @@
-class_path: SphericalSweep
+class_path: dsta_mvs.model.cost_volume_builder.SphericalSweep
 init_args:
   num_cams: &num_cams 3
   feat_chs: &feat_chs 48

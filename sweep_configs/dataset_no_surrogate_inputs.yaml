@@ -1,4 +1,4 @@
-class_path: MVSLocalDataModule
+class_path: dsta_mvs.support.datamodule.MVSLocalDataModule
 init_args:
   bf: &bf 96
   dist_list: "sweep@dist_list"
