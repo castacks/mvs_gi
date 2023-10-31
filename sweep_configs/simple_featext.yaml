@@ -1,4 +1,4 @@
-class_path: dsta_mvs.model.feature_extractor.simple_feature_extractor.SimpleFeatExtraction
+class_path: dsta_mvs.model.feature_extractor.SimpleFeatExtraction
 init_args:
   in_size: [512, 2048]
   in_chs: 3

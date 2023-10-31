@@ -1,5 +1,5 @@
 transforms:
-- class_path: dsta_mvs.support.augmentation.augmentation.RandomSingleImageMasking
+- class_path: dsta_mvs.support.augmentation.RandomSingleImageMasking
   init_args:
     scale: [0.05, 0.20]
     ratio: [0.3, 3.3]

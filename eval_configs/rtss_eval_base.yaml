@@ -1,7 +1,7 @@
 ---
 fit:
   data:
-    class_path: dsta_mvs.support.datamodule.mvs_datamodule.MVSLocalDataModule
+    class_path: dsta_mvs.support.datamodule.MVSLocalDataModule
     init_args:
       bf: &bf 96
       dist_list: "sweep@dist_list"
@@ -72,41 +72,41 @@ fit:
 
       validation_metrics:
         ssim:
-          class_path: dsta_mvs.support.loss_function.metrics.SSIMMetric
+          class_path: dsta_mvs.support.loss_function.SSIMMetric
           init_args:
             bf: *bf
             dist_list: "sweep@dist_list"
         rmse:
-          class_path: dsta_mvs.support.loss_function.metrics.RMSEMetric
+          class_path: dsta_mvs.support.loss_function.RMSEMetric
           init_args:
             bf: *bf
             dist_list: "sweep@dist_list"
         mae:
-          class_path: dsta_mvs.support.loss_function.metrics.MAEMetric
+          class_path: dsta_mvs.support.loss_function.MAEMetric
           init_args:
             bf: *bf
             dist_list: "sweep@dist_list"
         mae_dist:
-          class_path: dsta_mvs.support.loss_function.metrics.InverseMetricWrapper
+          class_path: dsta_mvs.support.loss_function.InverseMetricWrapper
           init_args:
             metric:
-              class_path: dsta_mvs.support.loss_function.metrics.MAEMetric
+              class_path: dsta_mvs.support.loss_function.MAEMetric
               init_args:
                 bf: *bf
                 dist_list: "sweep@dist_list"
         rmse_dist:
-          class_path: dsta_mvs.support.loss_function.metrics.InverseMetricWrapper
+          class_path: dsta_mvs.support.loss_function.InverseMetricWrapper
           init_args:
             metric:
-              class_path: dsta_mvs.support.loss_function.metrics.RMSEMetric
+              class_path: dsta_mvs.support.loss_function.RMSEMetric
               init_args:
                 bf: *bf
                 dist_list: "sweep@dist_list"
         ssim_dist:
-          class_path: dsta_mvs.support.loss_function.metrics.InverseMetricWrapper
+          class_path: dsta_mvs.support.loss_function.InverseMetricWrapper
           init_args:
             metric:
-              class_path: dsta_mvs.support.loss_function.metrics.SSIMMetric
+              class_path: dsta_mvs.support.loss_function.SSIMMetric
               init_args:
                 bf: *bf
                 dist_list: "sweep@dist_list"
