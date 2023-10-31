@@ -4,7 +4,7 @@ import copy
 from jsonargparse import ArgumentParser
 import os
 import sys
-from typing import List
+from typing import Any, List
 
 # PyTorch.
 import torch
@@ -16,18 +16,6 @@ torch.set_float32_matmul_precision('high')
 # PyTorch Lightning.
 from lightning import Trainer, LightningModule
 from lightning.pytorch.cli import SaveConfigCallback
-
-# Project packages.
-from dsta_mvs.model.mvs_model.spherical_sweep_stereo import *
-
-from dsta_mvs.model.feature_extractor import *
-from dsta_mvs.model.cost_volume_builder import *
-from dsta_mvs.model.cost_volume_regulator import *
-from dsta_mvs.model.distance_regressor import *
-
-from dsta_mvs.support.loss_function import *
-from dsta_mvs.support.augmentation import *
-from dsta_mvs.support.datamodule import *
 
 from config_helper import ( 
         construct_config_on_filesystem,

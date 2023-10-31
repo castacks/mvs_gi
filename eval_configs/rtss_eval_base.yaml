@@ -1,7 +1,7 @@
 ---
 fit:
   data:
-    class_path: MVSLocalDataModule
+    class_path: dsta_mvs.support.datamodule.mvs_datamodule.MVSLocalDataModule
     init_args:
       bf: &bf 96
       dist_list: "sweep@dist_list"
@@ -72,41 +72,41 @@ fit:
 
       validation_metrics:
         ssim:
-          class_path: SSIMMetric
+          class_path: dsta_mvs.support.loss_function.metrics.SSIMMetric
           init_args:
             bf: *bf
             dist_list: "sweep@dist_list"
         rmse:
-          class_path: RMSEMetric
+          class_path: dsta_mvs.support.loss_function.metrics.RMSEMetric
           init_args:
             bf: *bf
             dist_list: "sweep@dist_list"
         mae:
-          class_path: MAEMetric
+          class_path: dsta_mvs.support.loss_function.metrics.MAEMetric
           init_args:
             bf: *bf
             dist_list: "sweep@dist_list"
         mae_dist:
-          class_path: InverseMetricWrapper
+          class_path: dsta_mvs.support.loss_function.metrics.InverseMetricWrapper
           init_args:
             metric:
-              class_path: MAEMetric
+              class_path: dsta_mvs.support.loss_function.metrics.MAEMetric
               init_args:
                 bf: *bf
                 dist_list: "sweep@dist_list"
         rmse_dist:
-          class_path: InverseMetricWrapper
+          class_path: dsta_mvs.support.loss_function.metrics.InverseMetricWrapper
           init_args:
             metric:
-              class_path: RMSEMetric
+              class_path: dsta_mvs.support.loss_function.metrics.RMSEMetric
               init_args:
                 bf: *bf
                 dist_list: "sweep@dist_list"
         ssim_dist:
-          class_path: InverseMetricWrapper
+          class_path: dsta_mvs.support.loss_function.metrics.InverseMetricWrapper
           init_args:
             metric:
-              class_path: SSIMMetric
+              class_path: dsta_mvs.support.loss_function.metrics.SSIMMetric
               init_args:
                 bf: *bf
                 dist_list: "sweep@dist_list"

@@ -1,7 +1,7 @@
 ---
 fit:
   data:
-    class_path: MVSLocalDataModule
+    class_path: dsta_mvs.support.datamodule.mvs_datamodule.MVSLocalDataModule
     init_args:
       bf: &bf 96
       dist_list: "sweep@dist_list"
@@ -48,7 +48,7 @@ fit:
       cv_builder: null
       
       cv_regulator:
-        class_path: UNetCostVolumeRegulator
+        class_path: dsta_mvs.model.cost_volume_regulator.unet_regulator.UNetCostVolumeRegulatorBase
         init_args:
           in_chs: &feat_chs 16
           final_chs: 1
@@ -65,7 +65,7 @@ fit:
           relu_type: &relu_type "leaky"
       
       dist_regressor: 
-        class_path: DistanceRegressorWithFixedCandidates
+        class_path: dsta_mvs.model.distance_regressor.distance_regressor.DistanceRegressorWithFixedCandidates
         init_args:
           bf: *bf
           dist_cands: "sweep@dist_list"
@@ -78,41 +78,41 @@ fit:
       
       validation_metrics:
         ssim:
-          class_path: SSIMMetric
+          class_path: dsta_mvs.support.loss_function.metrics.SSIMMetric
           init_args:
             bf: *bf
             dist_list: "sweep@dist_list"
         rmse:
-          class_path: RMSEMetric
+          class_path: dsta_mvs.support.loss_function.metrics.RMSEMetric
           init_args:
             bf: *bf
             dist_list: "sweep@dist_list"
         mae:
-          class_path: MAEMetric
+          class_path: dsta_mvs.support.loss_function.metrics.MAEMetric
           init_args:
             bf: *bf
             dist_list: "sweep@dist_list"
         mae_dist:
-          class_path: InverseMetricWrapper
+          class_path: dsta_mvs.support.loss_function.metrics.InverseMetricWrapper
           init_args:
             metric:
-              class_path: MAEMetric
+              class_path: dsta_mvs.support.loss_function.metrics.MAEMetric
               init_args:
                 bf: *bf
                 dist_list: "sweep@dist_list"
         rmse_dist:
-          class_path: InverseMetricWrapper
+          class_path: dsta_mvs.support.loss_function.metrics.InverseMetricWrapper
           init_args:
             metric:
-              class_path: RMSEMetric
+              class_path: dsta_mvs.support.loss_function.metrics.RMSEMetric
               init_args:
                 bf: *bf
                 dist_list: "sweep@dist_list"
         ssim_dist:
-          class_path: InverseMetricWrapper
+          class_path: dsta_mvs.support.loss_function.metrics.InverseMetricWrapper
           init_args:
             metric:
-              class_path: SSIMMetric
+              class_path: dsta_mvs.support.loss_function.metrics.SSIMMetric
               init_args:
                 bf: *bf
                 dist_list: "sweep@dist_list"
@@ -120,10 +120,10 @@ fit:
       volume_loss: null
       
       distance_loss: 
-        class_path: MaskedSmoothL1Loss
+        class_path: dsta_mvs.support.loss_function.distance_loss.MaskedSmoothL1Loss
         init_args:
           dist_regressor:
-            class_path: DistanceRegressorWithFixedCandidates
+            class_path: dsta_mvs.model.distance_regressor.distance_regressor.DistanceRegressorWithFixedCandidates
             init_args:
               bf: *bf
               dist_cands: "sweep@dist_list"

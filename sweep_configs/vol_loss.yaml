@@ -1,4 +1,4 @@
-class_path: VolumeCrossEntropy
+class_path: dsta_mvs.support.loss_function.distance_loss.VolumeCrossEntropy
 init_args:
   bf: &bf 96
   dist_list: "sweep@dist_list"
