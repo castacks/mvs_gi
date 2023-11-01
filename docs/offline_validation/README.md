@@ -124,7 +124,7 @@ reflect the system setting.
  Then run the `run.sh` file.
 
 ```bash
-cd <path to workspace>/CR_EV004
+cd <path to working root>/CR_EV004
 ./run.sh
 ```
 
