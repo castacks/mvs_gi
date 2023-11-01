@@ -17,7 +17,18 @@ For the developers, [here](docs/original_home_page_readme/README.md) is the orig
 
 # Training and validation procedures and pre-trained models
 
-(Coming soon)
+(More details coming soon)
+
+Pre-trained models (need associated configs):
+
+| Model name | Link                                                                                                                |
+|------------|---------------------------------------------------------------------------------------------------------------------|
+| E8         | https://airlab-share.andrew.cmu.edu:8081/mvs_gi/pre_trained_models/E8/dsta_sweep_config24_WB_jbektzh2_v122.ckpt     |
+| G8         | https://airlab-share.andrew.cmu.edu:8081/mvs_gi/pre_trained_models/G8/dsta_sweep_config25_WB_koju4sfh_v140.ckpt     |
+| E16        | https://airlab-share.andrew.cmu.edu:8081/mvs_gi/pre_trained_models/E16/dsta_sweep_config19_WB_zdtldl4s_v96.ckpt     |
+| G16        | https://airlab-share.andrew.cmu.edu:8081/mvs_gi/pre_trained_models/G16/dsta_sweep_config20_WB_f6tysxvk_v93.ckpt     |
+| G16V       | https://airlab-share.andrew.cmu.edu:8081/mvs_gi/pre_trained_models/G16V/dsta_sweep_config21_WB_a7kccavm_v59.ckpt    |
+| G16VV      | https://airlab-share.andrew.cmu.edu:8081/mvs_gi/pre_trained_models/G16VV/dsta_sweep_config103_WB_jy2dqg6r_v102.ckpt |
 
 # Datasets
 
