@@ -5,6 +5,9 @@ import cv2
 import numpy as np
 import re
 import time
+import os
+
+from plyfile import PlyData, PlyElement
 
 import torch
 from torch import nn, Tensor
@@ -112,6 +115,7 @@ class SphericalSweepStereo(SphericalSweepStereoBase, pl.LightningModule):
         self.val_offline_flag = val_offline_flag # Set this to True for offline validation.
 
         if val_loader_names is not None:
+            # import pdb;pdb.set_trace()
             self.val_loader_names = dict()
             self.val_depth_pred_keys = dict()
             self.val_offline_count = dict()
@@ -226,7 +230,7 @@ class SphericalSweepStereo(SphericalSweepStereoBase, pl.LightningModule):
             if batch_idx == 0:
                 self._register_validation_metrics()
         
-        imgs        = batch['imgs']
+        imgs        = batch['imgs'] #[1,3,3,512,2048]
         grids       = batch['grids']
         grid_masks  = batch['grid_masks']
         masks       = batch['masks']
@@ -244,6 +248,7 @@ class SphericalSweepStereo(SphericalSweepStereoBase, pl.LightningModule):
         print_imgs = val_set_settings["print_imgs"]
         print_warped_inputs = val_set_settings["print_warped_inputs"]
         print_imgs_freq = val_set_settings["print_imgs_batch_freq"]
+        project_3d = val_set_settings["project_3d_points"]
 
         # Memory and measurement.
         if self.val_offline_flag:
@@ -262,7 +267,8 @@ class SphericalSweepStereo(SphericalSweepStereoBase, pl.LightningModule):
         costs = self.cv_regulator(vol)
 
         # Regression for outputs.
-        inv_dist = self.dist_regressor(costs)
+        inv_dist = self.dist_regressor(costs) #why [1,1,160,640]
+        # import pdb;pdb.set_trace()
         
         # Memory and time measurement.
         if self.val_offline_flag:
@@ -329,6 +335,9 @@ class SphericalSweepStereo(SphericalSweepStereoBase, pl.LightningModule):
                         warped_inputs[0].unsqueeze(0),
                         inv_dist[0].unsqueeze(0),
                         labels=labels )
+                
+                if project_3d:
+                    self._project_3d(inv_dist, batch, dataloader_idx)
 
         if not self.val_offline_flag:
             # This happens during training.
@@ -398,7 +407,7 @@ class SphericalSweepStereo(SphericalSweepStereoBase, pl.LightningModule):
         
         # Resize the stacked input images.
         stacked_input_resized = cv2.resize( 
-            stacked_input, ( W_pred, H_new ), interpolation=cv2.INTER_LINEAR )
+            stacked_input, ( W_pred, H_new ), interpolation=cv2.INTER_LINEAR )#(480, 640, 3)
 
         # Normalize. TODO: fix range
         lab_min, lab_max = self.lab_min / bf, self.lab_max / bf
@@ -410,6 +419,7 @@ class SphericalSweepStereo(SphericalSweepStereoBase, pl.LightningModule):
             stacked_vis = np.concatenate( ( pred_vis, stacked_input_resized ), axis=0 )
 
         stacked_vis = cv2.cvtColor(stacked_vis, cv2.COLOR_BGR2RGB)
+        # import pdb;pdb.set_trace()
         
         return stacked_vis
 
@@ -417,13 +427,12 @@ class SphericalSweepStereo(SphericalSweepStereoBase, pl.LightningModule):
         assert self.dataset_indexed_cam_models is not None
 
         # Convert the output to distance.
-        bf = self.dist_regressor.bf
+        bf = self.dist_regressor.bf #constant 96
         dist = bf / outputs
 
         # Camera models.
         cam_models = self.dataset_indexed_cam_models[dataloader_idx]
-        cam_model_rig = cam_models['rig']
-
+        cam_model_rig = cam_models['rig'] #unit sphere output
         # Get the dimension of the output.
         out_H, out_W = cam_model_rig.shape
         
@@ -468,4 +477,84 @@ class SphericalSweepStereo(SphericalSweepStereoBase, pl.LightningModule):
         return torch.stack( 
             [ warped_input_dict[cam_idx] for cam_idx in sorted( warped_input_dict.keys() ) ],
             dim=1 ) # [B, X, C, H, W]
+    
+    def _get_rgb_point(self, imgs: Tensor, pred_shape):
+        # Get rgb for 3d point projection for real-world data
+
+        # Stack the input images.
+        stacked_input = multi_view_tensor_2_stacked_cv2_img(imgs)[0]
+
+        H_stacked_input, W_stacked_input = stacked_input.shape[:2]
+        W_pred = pred_shape[-1]
+        H_new = int( W_pred / W_stacked_input * H_stacked_input)
+        # Resize the stacked input images.
+        stacked_input_resized = cv2.resize( 
+            stacked_input, ( W_pred, H_new ), interpolation=cv2.INTER_LINEAR )#(480, 640, 3)
+        rgb_np = stacked_input_resized[:160,:,:] #(160,640,3)
+        rgb = torch.from_numpy(rgb_np).float().to('cuda')
+        rgb = rgb.reshape(3, -1).unsqueeze(0)
+        # import pdb;pdb.set_trace()
+        return rgb
+
+    def _project_3d(self, outputs: Tensor, batch: dict, dataloader_idx: int):
+        assert self.dataset_indexed_cam_models is not None
+
+        # Convert the output to distance.
+        bf = self.dist_regressor.bf #constant 96
+        dist = bf / outputs #in unit sphere [1,1,160,640]
+        dist_shape = dist.shape
+        #dist_unit = dist.squeeze() #[160,640]
+
+        # Camera models.
+        cam_models = self.dataset_indexed_cam_models[dataloader_idx]
+        cam_model_rig = cam_models['rig'] #unit sphere output [160, 640]
+        out_H, out_W = cam_model_rig.shape
+
+        # Convert the distance to xyz vectors in the output camera frame.
+        rays, _ = cam_model_rig.get_rays_wrt_sensor_frame()
+        rays = rays.unsqueeze(0).to( device=dist.device ) # [B, 3, N]
+        dist = dist.view(-1, 1, out_H*out_W) # [B, 1, N]
+        xyz = rays * dist #[1, 3, 160x640]
+
+        # Get RGB of each point
+        if 'rig_rgb' in batch:
+            rgb = batch['rig_rgb'].reshape(3, -1).unsqueeze(0) #[1, 3, 160x640]
+        else:
+
+            rgb = torch.full((3, xyz.shape[-1]), 255, dtype=torch.uint8).unsqueeze(0).to('cuda') #manually set to white for now
+            # imgs = batch['imgs']
+            # rgb = self._get_rgb_point(imgs[0].unsqueeze(0), dist_shape) #[1,3,160x640]
+
+        # Filtering out points where dist is greater than 90
+        # TODO: put 90 in configuration - refer to histogram for value
+        mask = dist <= 40
+        points = xyz[mask.expand_as(xyz)].reshape(3, -1) #torch.Size([3, 88163])
+        points_rgb = rgb[mask.expand_as(rgb)].reshape(3,-1) #torch.Size([3, 88163])
+        if points_rgb.max() <= 1:
+            points_rgb = (points_rgb * 255).to(torch.uint8)
+        else:
+            points_rgb = points_rgb.to(torch.uint8)
+
+
+        # Define file path and name
+        file_path = batch['fn_rgb_cam0'][0]
+        f_split = file_path.split('/')
+        f_split[0] = '/'
+        dataset_path = os.path.join(*f_split[:6])
+        fn = f_split[-1].split('.')[0]
+
+        if not os.path.exists(f'{dataset_path}/point_cloud'):
+            os.mkdir(f'{dataset_path}/point_cloud')
+
+        # Define the data type for the PLY format
+        vertex = np.array([(points[0, i], points[1, i], points[2, i], points_rgb[0, i], 
+                        points_rgb[1, i], points_rgb[2, i]) 
+                        for i in range(points.shape[1])],
+                        dtype=[('x', 'f4'), ('y', 'f4'), ('z', 'f4'), 
+                        ('red', 'u1'), ('green', 'u1'), ('blue', 'u1')]) #f4: 32-bit float
+        # CWrite to ply
+        el = PlyElement.describe(vertex, 'vertex')
+        PlyData([el], text=True).write(f'{dataset_path}/point_cloud/{fn}.ply')
+        #dist_unit x cam_model_rig, save to file
+        # import pdb;pdb.set_trace()
     

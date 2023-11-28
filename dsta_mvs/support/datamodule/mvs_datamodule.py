@@ -84,7 +84,9 @@ class MVSLocalDataModule(pl.LightningDataModule):
         self.bf = bf
         self.dist_list = dist_list
         self.data_dirs = data_dirs
-        self.batch_size = self.data_dirs["main"]["batch_size"]
+        # Assuming the first key from the .keys() function has the "batch_size" entry.
+        # self.batch_size = self.data_dirs["main"]["batch_size"]
+        self.batch_size = self.data_dirs[ list( self.data_dirs.keys() )[0] ]["batch_size"]
         self.shuffle_train = shuffle_train
         self.shuffle_val = shuffle_val
         self.num_workers = num_workers

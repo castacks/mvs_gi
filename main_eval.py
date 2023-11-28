@@ -167,7 +167,7 @@ def prepare_model(checkpoint_fn, cfg_object, cfg_raw):
         model.dist_regressor = ckpt['hyper_parameters']['dist_regressor']
     else:
         model = cfg_object.model
-    
+    # print(cfg_raw['model']['init_args']['val_loader_names'], "============")
     # Override model configurations that are changed during validation w.r.t. training.
     model.re_configure( val_loader_names=cfg_raw['model']['init_args']['val_loader_names'],
                         visualization_range=cfg_raw['model']['init_args']['visualization_range'],

@@ -542,12 +542,17 @@ class MultiViewCameraModelDataset(Dataset):
         # img_t has 4 dimensions.
         return img_t.squeeze(0), img_raw
 
-    def read_input_rgb(self, i, cam_key):
+    def compose_rgb_input_fn(self, i, cam_key):
         # Compose the file path and read the image.
         fn = os.path.join(
             self.dataset_path,
             self.filenames[f'{cam_key}{self.csv_input_rgb_suffix}'][i] )
-        
+
+        return fn
+
+    def read_input_rgb(self, i, cam_key):
+        # Compose the file path and read the image.
+        fn = self.compose_rgb_input_fn(i, cam_key)
         return self.read_rgb_as_tensor(fn, cam_key)
 
     def read_true_rgb(self, i):
@@ -647,9 +652,13 @@ class MultiViewCameraModelDataset(Dataset):
             self.update_rays_according_2_true_dist(true_dist_raw)
             self.create_grids_from_rays()
 
+        # TODO: debug use.
+        fn_rgb_cam0 = self.compose_rgb_input_fn(i, 'cam0')
+
         # Put everything into a dictionary.
         data_entry = {
             'sel_id': torch.Tensor([i]).to(dtype=torch.int32),
+            'fn_rgb_cam0': fn_rgb_cam0,
             'imgs': imgs,
             'masks': masks,
             'grids': self.grids,
@@ -805,9 +814,12 @@ class FullDistDataset(MultiViewCameraModelDataset):
             self.update_rays_according_2_true_dist(true_dist_raw)
             self.create_grids_from_rays()
 
+        fn_rgb_cam0 = self.compose_rgb_input_fn(i, 'cam0')
+
         # Put everything into a dictionary.
         data_entry = {
             'sel_id': torch.Tensor([i]).to(dtype=torch.int32),
+            'fn_rgb_cam0': fn_rgb_cam0,
             'imgs': imgs,
             'masks': masks,
             'dist_inv': dist_inv,
@@ -997,7 +1009,7 @@ class ROSDroneImagesDataset(MultiViewCameraModelDataset):
             imgs.append(t_img)
             imgs_raw.append(img_raw)
             masks.append(self.masks[cam_key])
-                 
+        
         # Rearrange images according to the correct order of the real images
         imgs  = [imgs[i] for i in self.order]
         masks = [masks[i] for i in self.order]
@@ -1009,16 +1021,20 @@ class ROSDroneImagesDataset(MultiViewCameraModelDataset):
 
         # TODO: Potential bug! Assuming cam0 is the rig!
         rig_mask = masks[0]
+        rig_rgb  = imgs[0] #NOT CORRECT
+
+        fn_rgb_cam0 = self.compose_rgb_input_fn(i, 'cam0')
 
         # Put everything into a dictionary.
         data_entry = {
             'sel_id': torch.Tensor([i]).to(dtype=torch.int32),
+            'fn_rgb_cam0': fn_rgb_cam0,
             'imgs': imgs,
             'masks': masks,
             'grids': self.grids,
             'grid_masks': self.grids_valid_masks,
             'cam_poses': self.cam_poses,
-            'rig_mask': rig_mask,
+            'rig_mask': rig_mask
         }
         
         if self.keep_raw_image:
