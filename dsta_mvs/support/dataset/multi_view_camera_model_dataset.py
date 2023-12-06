@@ -50,8 +50,9 @@ class MultiViewCameraModelDataset(Dataset):
             conf_dist_lab_tab=None,
             map_camera_frame=None, # Camera frames for the output images. Should be a dict.
             cam_key_cv='cv', # The virtual camera for the cost volume.
+            have_rays_by_name=False,
             true_grid=False,
-            rig_grid=False,
+            have_grids_by_name=False,
             align_corners=False,
             align_corners_nearest=False,
             keep_raw_image=False,
@@ -77,8 +78,9 @@ class MultiViewCameraModelDataset(Dataset):
         conf_dist_lab_tab=None,
         map_camera_frame: dict=None, # Camera frames for the output images.
         cam_key_cv='cv', # The virtual camera for the cost volume.
+        have_rays_by_name=False,
         true_grid=False,
-        rig_grid=False, # Set this flag to also generate grids for the rig camera for visualization.
+        have_grids_by_name=False, # Set this flag to also generate grids for the rig camera for visualization.
         align_corners=False,
         align_corners_nearest=False,
         keep_raw_image=False,
@@ -150,6 +152,7 @@ class MultiViewCameraModelDataset(Dataset):
         self.sample_masks()
 
         # === Rays for building the cost volume. ===
+        self.have_rays_by_name = have_rays_by_name
         # Create an array of rays for use in creating the feature-to-cost volume sampling grids.
         self.ray_maker = RayMaker( camera_model=self.map_camera_model[self.cam_key_cv],
                                    frame_name=self.frame_cv )
@@ -164,7 +167,7 @@ class MultiViewCameraModelDataset(Dataset):
         self.rays = self.init_sweep_rays_cuda()
         
         # === Grids. ===
-        self.have_rig_grid = rig_grid
+        self.have_grids_by_name = have_grids_by_name
         self.grids_by_name = dict()
         self.grids_valid_masks_by_name = dict()
         
@@ -173,7 +176,7 @@ class MultiViewCameraModelDataset(Dataset):
         self.grids = None
         self.grids_valid_masks = None
         
-        if self.have_rig_grid:
+        if self.have_grids_by_name:
             self.create_grids_from_multiple_rays()
             self.grids = self.grids_by_name[self.cam_key_cv]
             self.grids_valid_masks = self.grids_valid_masks_by_name[self.cam_key_cv]
@@ -731,8 +734,11 @@ class MultiViewCameraModelDataset(Dataset):
             data_entry['imgs_raw'] = imgs_raw
             data_entry['rig_rgb_raw'] = rig_rgb_raw
             data_entry['rig_dist_raw'] = true_dist_raw
-            
-        if self.have_rig_grid:
+        
+        if self.have_rays_by_name:
+            data_entry['rays_by_name'] = self.rays_by_name
+        
+        if self.have_grids_by_name:
             data_entry['grids_by_name'] = self.grids_by_name
             data_entry['grids_valid_masks_by_name'] = self.grids_valid_masks_by_name
         
@@ -758,8 +764,9 @@ class FullDistDataset(MultiViewCameraModelDataset):
             conf_dist_lab_tab=None,
             map_camera_frame=None, # Camera frames for the output images. Should be a dict.
             cam_key_cv='cv', # The virtual camera for the cost volume.
+            have_rays_by_name=False,
             true_grid=False,
-            rig_grid=False,
+            have_grids_by_name=False,
             align_corners=False,
             align_corners_nearest=False,
             keep_raw_image=False,
@@ -785,8 +792,9 @@ class FullDistDataset(MultiViewCameraModelDataset):
         conf_dist_lab_tab=None,
         map_camera_frame: dict=None, # Camera frames for the output images.
         cam_key_cv='cv', # The virtual camera for the cost volume.
+        have_rays_by_name=False,
         true_grid=False,
-        rig_grid=False,
+        have_grids_by_name=False,
         align_corners=False,
         align_corners_nearest=False,
         keep_raw_image=False,
@@ -810,8 +818,9 @@ class FullDistDataset(MultiViewCameraModelDataset):
             conf_dist_lab_tab=conf_dist_lab_tab,
             map_camera_frame=map_camera_frame, # Camera frames for the output images.
             cam_key_cv=cam_key_cv, # The virtual camera for the cost volume.
+            have_rays_by_name=have_rays_by_name,
             true_grid=true_grid,
-            rig_grid=rig_grid,
+            have_grids_by_name=have_grids_by_name,
             align_corners=align_corners,
             align_corners_nearest=align_corners_nearest,
             keep_raw_image=keep_raw_image,
@@ -898,8 +907,11 @@ class FullDistDataset(MultiViewCameraModelDataset):
             data_entry['dist_raw'] = dist_raw
             data_entry['rig_rgb_raw'] = rig_rgb_raw
             data_entry['rig_dist_raw'] = true_dist_raw
-            
-        if self.have_rig_grid:
+        
+        if self.have_rays_by_name:
+            data_entry['rays_by_name'] = self.rays_by_name
+        
+        if self.have_grids_by_name:
             data_entry['grids_by_name'] = self.grids_by_name
             data_entry['grids_valid_masks_by_name'] = self.grids_valid_masks_by_name
         
@@ -921,8 +933,9 @@ class ROSDroneImagesDataset(MultiViewCameraModelDataset):
             conf_dist_lab_tab=None,
             map_camera_frame=None, # Camera frames for the output images. Should be a dict.
             cam_key_cv='cv', # The virtual camera for the cost volume.
+            have_rays_by_name=False,
             true_grid=False,
-            rig_grid=False,
+            have_grids_by_name=False,
             align_corners=False,
             align_corners_nearest=False,
             keep_raw_image=False,
@@ -945,8 +958,9 @@ class ROSDroneImagesDataset(MultiViewCameraModelDataset):
         conf_dist_lab_tab=None,
         map_camera_frame: dict=None, # Camera frames for the output images.
         cam_key_cv='cv', # The virtual camera for the cost volume.
+        have_rays_by_name=False,
         true_grid=False,
-        rig_grid=False,
+        have_grids_by_name=False,
         align_corners=False,
         align_corners_nearest=False,
         keep_raw_image=False,
@@ -970,8 +984,9 @@ class ROSDroneImagesDataset(MultiViewCameraModelDataset):
             conf_dist_lab_tab=conf_dist_lab_tab,
             map_camera_frame=map_camera_frame, # Camera frames for the output images.
             cam_key_cv=cam_key_cv, # The virtual camera for the cost volume.
+            have_rays_by_name=have_rays_by_name,
             true_grid=true_grid,
-            rig_grid=rig_grid,
+            have_grids_by_name=have_grids_by_name,
             align_corners=align_corners,
             align_corners_nearest=align_corners_nearest,
             keep_raw_image=keep_raw_image,
@@ -1104,8 +1119,11 @@ class ROSDroneImagesDataset(MultiViewCameraModelDataset):
         
         if self.keep_raw_image:
             data_entry['imgs_raw'] = imgs_raw
-            
-        if self.have_rig_grid:
+        
+        if self.have_rays_by_name:
+            data_entry['rays_by_name'] = self.rays_by_name
+        
+        if self.have_grids_by_name:
             data_entry['grids_by_name'] = self.grids_by_name # TODO: Potential bug! The order of the camras can change!
             data_entry['grids_valid_masks_by_name'] = self.grids_valid_masks_by_name # TODO: Potential bug! The order of the camras can change!
         
