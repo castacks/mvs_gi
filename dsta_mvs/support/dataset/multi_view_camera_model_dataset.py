@@ -51,6 +51,7 @@ class MultiViewCameraModelDataset(Dataset):
             map_camera_frame=None, # Camera frames for the output images. Should be a dict.
             cam_key_cv='cv', # The virtual camera for the cost volume.
             true_grid=False,
+            rig_grid=False,
             align_corners=False,
             align_corners_nearest=False,
             keep_raw_image=False,
@@ -77,6 +78,7 @@ class MultiViewCameraModelDataset(Dataset):
         map_camera_frame: dict=None, # Camera frames for the output images.
         cam_key_cv='cv', # The virtual camera for the cost volume.
         true_grid=False,
+        rig_grid=False, # Set this flag to also generate grids for the rig camera for visualization.
         align_corners=False,
         align_corners_nearest=False,
         keep_raw_image=False,
@@ -151,17 +153,33 @@ class MultiViewCameraModelDataset(Dataset):
         # Create an array of rays for use in creating the feature-to-cost volume sampling grids.
         self.ray_maker = RayMaker( camera_model=self.map_camera_model[self.cam_key_cv],
                                    frame_name=self.frame_cv )
+        self.ray_makers = { self.cam_key_cv : self.ray_maker }
+        self.ray_makers['rig'] = RayMaker(
+            camera_model=self.map_camera_model['rig'],
+            frame_name=self.map_camera_frame['rig'] )
 
+        self.rays_by_name = dict()
+        # The call to self.init_sweep_rays_cuda() will populate self.rays_by_name.
         # [ 3, N, H, W ]
         self.rays = self.init_sweep_rays_cuda()
         
         # === Grids. ===
+        self.have_rig_grid = rig_grid
+        self.grids_by_name = dict()
+        self.grids_valid_masks_by_name = dict()
+        
         # Will be a Tensor in the shape of [X, 4, 4] where X is the number of cameras.
         self.cam_poses = None
         self.grids = None
         self.grids_valid_masks = None
-        # self.grids and self.grids_valid_masks will be populated.
-        self.create_grids_from_rays()
+        
+        if self.have_rig_grid:
+            self.create_grids_from_multiple_rays()
+            self.grids = self.grids_by_name[self.cam_key_cv]
+            self.grids_valid_masks = self.grids_valid_masks_by_name[self.cam_key_cv]
+        else:
+            # Only self.grids and self.grids_valid_masks will be populated.
+            self.create_grids_from_rays()
         
         # === Filename list column suffix. ===
         # Need to set these values before the first call to len(self).
@@ -417,16 +435,25 @@ class MultiViewCameraModelDataset(Dataset):
             self.masks[cam] = mask.squeeze(0)
 
     def init_sweep_rays_cuda(self, true_dist=None):
+        # TODO: here, valid_mask is not used.
         # Prepare memory for a [3, N, Ho, Wo] grid for the 
         # spherical rays. N is 1 for true sweep.
         if true_dist is not None:
             # true_dist is a Torch tensor with the shape of [1, H, W].
-            rays, valid_mask = self.ray_maker.make_rays( grid_distance=true_dist)
+            rays, valid_mask = self.ray_maker.make_rays( grid_distance=true_dist )
+            
+            # TODO: This is temporary fix.
+            return rays
         else:
             rays, valid_mask = self.ray_maker.make_rays( candidates=self.dist_lab_tab.dist() )
-
-        # TODO: here, valid_mask is not used.
-        return rays
+            
+            # TODO: This is temporary fix.
+            for name, ray_maker in self.ray_makers.items():
+                rays, valid_mask = ray_maker.make_rays( candidates=self.dist_lab_tab.dist() )
+                self.rays_by_name[name] = rays
+        
+        # TODO: This is temporary fix.        
+        return self.rays_by_name[self.cam_key_cv]
 
     def update_rays_according_2_true_dist(self, true_dist):
         # Re-sample the true distance with the cv sampler.
@@ -443,6 +470,7 @@ class MultiViewCameraModelDataset(Dataset):
 
     def make_sweep_grid_cuda(self, 
         grid_maker,
+        rays,
         pose: FTensor, 
         pose_error: FTensor=None):
 
@@ -450,6 +478,7 @@ class MultiViewCameraModelDataset(Dataset):
         https://docs.google.com/presentation/d/1TK_iSx5yYuJqvZ2fxQuvog4-87IDOr_9mho7AGR6K9A/edit#slide=id.ge5b0b7a031_0_0
 
         grid_maker: A callable object that takes in an array 3D points.
+        rays (Tensor): [ 3, N, H, W ], rays from the center of the target camera.
         pose (FTensor): The pose of the caemra.
         pose_error (FTensor): The pose error got added to the pose. Must be measured in the panorama frame.
         '''
@@ -473,7 +502,7 @@ class MultiViewCameraModelDataset(Dataset):
         # Transform the rays.
         # The rays are in the cv frame.
         rays = transform_3D_points_torch( 
-            inv_pose.unsqueeze(0), self.rays.unsqueeze(0) )
+            inv_pose.unsqueeze(0), rays.unsqueeze(0) )
 
         # Make the sampling grid.
         grid, valid_mask = grid_maker.make_grid(rays)
@@ -514,13 +543,51 @@ class MultiViewCameraModelDataset(Dataset):
             grid_maker = self.map_grid_maker[cam_key]
 
             # Cost volume sampling grid.
-            t_grid, t_valid_mask = self.make_sweep_grid_cuda(grid_maker, cam_pose)
+            t_grid, t_valid_mask = self.make_sweep_grid_cuda(grid_maker, self.rays, cam_pose)
 
             grids.append(t_grid)
             valid_masks.append(t_valid_mask)
 
         self.grids = torch.stack(grids)
         self.grids_valid_masks = torch.stack(valid_masks)
+
+        self.cam_poses = torch.stack( cam_poses, dim=0 ) # First dim is number of cameras.
+
+    def create_grids_from_multiple_rays(self):
+        cam_poses = []
+        grids_by_frame_name = dict()
+        valid_masks_by_frame_name = dict()
+        
+        for frame_name, _ in self.rays_by_name.items():
+            grids_by_frame_name[frame_name] = []
+            valid_masks_by_frame_name[frame_name] = []
+        
+        for k in self.cam_int_indices:
+            # if k != "rig":
+            cam_key = f'cam{k}'
+
+            # Get the pose of the image/camera w.r.t. the rig.
+            cam_pose = self.get_pose_from_sampler(cam_key)
+
+            # Save the pose.
+            # Because self.cam_int_indices is sorted.
+            cam_poses.append( cam_pose.tensor() )
+
+            # Get the grid maker.
+            grid_maker = self.map_grid_maker[cam_key]
+
+            for frame_name, rays in self.rays_by_name.items():
+                # Cost volume sampling grid.
+                t_grid, t_valid_mask = self.make_sweep_grid_cuda(grid_maker, rays, cam_pose)
+
+                grids_by_frame_name[frame_name].append(t_grid)
+                valid_masks_by_frame_name[frame_name].append(t_valid_mask)
+
+        for frame_name, grids in grids_by_frame_name.items():
+            self.grids_by_name[frame_name] = torch.stack(grids)
+            
+        for frame_name, valid_masks in valid_masks_by_frame_name.items():
+            self.grids_valid_masks_by_name[frame_name] = torch.stack(valid_masks)
 
         self.cam_poses = torch.stack( cam_poses, dim=0 ) # First dim is number of cameras.
 
@@ -664,6 +731,10 @@ class MultiViewCameraModelDataset(Dataset):
             data_entry['imgs_raw'] = imgs_raw
             data_entry['rig_rgb_raw'] = rig_rgb_raw
             data_entry['rig_dist_raw'] = true_dist_raw
+            
+        if self.have_rig_grid:
+            data_entry['grids_by_name'] = self.grids_by_name
+            data_entry['grids_valid_masks_by_name'] = self.grids_valid_masks_by_name
         
         return data_entry
     
@@ -688,6 +759,7 @@ class FullDistDataset(MultiViewCameraModelDataset):
             map_camera_frame=None, # Camera frames for the output images. Should be a dict.
             cam_key_cv='cv', # The virtual camera for the cost volume.
             true_grid=False,
+            rig_grid=False,
             align_corners=False,
             align_corners_nearest=False,
             keep_raw_image=False,
@@ -714,6 +786,7 @@ class FullDistDataset(MultiViewCameraModelDataset):
         map_camera_frame: dict=None, # Camera frames for the output images.
         cam_key_cv='cv', # The virtual camera for the cost volume.
         true_grid=False,
+        rig_grid=False,
         align_corners=False,
         align_corners_nearest=False,
         keep_raw_image=False,
@@ -738,6 +811,7 @@ class FullDistDataset(MultiViewCameraModelDataset):
             map_camera_frame=map_camera_frame, # Camera frames for the output images.
             cam_key_cv=cam_key_cv, # The virtual camera for the cost volume.
             true_grid=true_grid,
+            rig_grid=rig_grid,
             align_corners=align_corners,
             align_corners_nearest=align_corners_nearest,
             keep_raw_image=keep_raw_image,
@@ -824,6 +898,10 @@ class FullDistDataset(MultiViewCameraModelDataset):
             data_entry['dist_raw'] = dist_raw
             data_entry['rig_rgb_raw'] = rig_rgb_raw
             data_entry['rig_dist_raw'] = true_dist_raw
+            
+        if self.have_rig_grid:
+            data_entry['grids_by_name'] = self.grids_by_name
+            data_entry['grids_valid_masks_by_name'] = self.grids_valid_masks_by_name
         
         return data_entry
     
@@ -844,6 +922,7 @@ class ROSDroneImagesDataset(MultiViewCameraModelDataset):
             map_camera_frame=None, # Camera frames for the output images. Should be a dict.
             cam_key_cv='cv', # The virtual camera for the cost volume.
             true_grid=False,
+            rig_grid=False,
             align_corners=False,
             align_corners_nearest=False,
             keep_raw_image=False,
@@ -867,6 +946,7 @@ class ROSDroneImagesDataset(MultiViewCameraModelDataset):
         map_camera_frame: dict=None, # Camera frames for the output images.
         cam_key_cv='cv', # The virtual camera for the cost volume.
         true_grid=False,
+        rig_grid=False,
         align_corners=False,
         align_corners_nearest=False,
         keep_raw_image=False,
@@ -891,6 +971,7 @@ class ROSDroneImagesDataset(MultiViewCameraModelDataset):
             map_camera_frame=map_camera_frame, # Camera frames for the output images.
             cam_key_cv=cam_key_cv, # The virtual camera for the cost volume.
             true_grid=true_grid,
+            rig_grid=rig_grid,
             align_corners=align_corners,
             align_corners_nearest=align_corners_nearest,
             keep_raw_image=keep_raw_image,
@@ -1015,14 +1096,18 @@ class ROSDroneImagesDataset(MultiViewCameraModelDataset):
             'sel_id': torch.Tensor([i]).to(dtype=torch.int32),
             'imgs': imgs,
             'masks': masks,
-            'grids': self.grids,
-            'grid_masks': self.grids_valid_masks,
+            'grids': self.grids, # TODO: Potential bug! The order of the camras can change!
+            'grid_masks': self.grids_valid_masks, # TODO: Potential bug! The order of the camras can change!
             'cam_poses': self.cam_poses,
             'rig_mask': rig_mask,
         }
         
         if self.keep_raw_image:
             data_entry['imgs_raw'] = imgs_raw
+            
+        if self.have_rig_grid:
+            data_entry['grids_by_name'] = self.grids_by_name # TODO: Potential bug! The order of the camras can change!
+            data_entry['grids_valid_masks_by_name'] = self.grids_valid_masks_by_name # TODO: Potential bug! The order of the camras can change!
         
         return data_entry
     
