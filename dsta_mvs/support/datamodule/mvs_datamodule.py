@@ -113,6 +113,13 @@ class MVSLocalDataModule(pl.LightningDataModule):
         self.initialize_new_grid_maker_variables(self.data_dirs["main"]["path"])
 
         if stage == 'fit':
+            
+            have_rays_by_name = self.data_dirs["main"]["have_rays_by_name"] \
+                if "have_rays_by_name" in self.data_dirs["main"] else False
+            
+            have_grids_by_name = self.data_dirs["main"]["have_grids_by_name"] \
+                if "have_grids_by_name" in self.data_dirs["main"] else False
+            
             self.train_dataset = MultiViewCameraModelDataset(
                 dataset_path = self.data_dirs["main"]["path"], 
                 map_camera_model_raw = self.grid_maker_builder.camera_model_map_ori,
@@ -131,6 +138,8 @@ class MVSLocalDataModule(pl.LightningDataModule):
                 ),
                 map_camera_frame=self.map_camera_frame,
                 cam_key_cv = 'cv',
+                have_rays_by_name=have_rays_by_name,
+                have_grids_by_name=have_grids_by_name,
                 align_corners = False,
                 align_corners_nearest = False,
                 data_keys = ['train'],
@@ -154,6 +163,12 @@ class MVSLocalDataModule(pl.LightningDataModule):
                 dataset_type = dataset_settings["type"]
                 step_size = dataset_settings["step_size"]
                 keep_raw_imgs = dataset_settings["keep_raw_imgs"]
+                
+                have_rays_by_name = dataset_settings["have_rays_by_name"] \
+                    if "have_rays_by_name" in dataset_settings else False
+                
+                have_grids_by_name = dataset_settings["have_grids_by_name"] \
+                    if "have_grids_by_name" in dataset_settings else False
 
                 if dataset_type == "real":
                     num_samples = dataset_settings["num_samples"]
@@ -178,6 +193,8 @@ class MVSLocalDataModule(pl.LightningDataModule):
                         ),
                         map_camera_frame=self.map_camera_frame,
                         cam_key_cv = 'cv',
+                        have_rays_by_name=have_rays_by_name,
+                        have_grids_by_name=have_grids_by_name,
                         align_corners = False,
                         align_corners_nearest = False,
                         data_keys = [ds_key],
@@ -209,6 +226,8 @@ class MVSLocalDataModule(pl.LightningDataModule):
                         ),
                         map_camera_frame=self.map_camera_frame,
                         cam_key_cv = 'cv',
+                        have_rays_by_name=have_rays_by_name,
+                        have_grids_by_name=have_grids_by_name,
                         align_corners = False,
                         align_corners_nearest = False,
                         data_keys = ['validate' if ds_key.startswith( "main" ) else ds_key],
