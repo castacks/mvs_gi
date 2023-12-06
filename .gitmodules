@@ -9,3 +9,6 @@
 [submodule "eval_wrappers/dsta_sphere_stereo_cvpr2021"]
 	path = eval_wrappers/dsta_sphere_stereo_cvpr2021
 	url = https://github.com/castacks/dsta-sphere-stereo-cvpr2021.git
+[submodule "config_helper"]
+	path = config_helper
+	url = git@github.com:castacks/config_helper.git
