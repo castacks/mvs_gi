@@ -37,7 +37,7 @@ preprocess the ONNX model using Nvidia's [polygraphy][polygraphy_git] tool.
 [polygraphy_git]: https://github.com/NVIDIA/TensorRT/tree/main/tools/Polygraphy
 
 ```sh
-polygraphy surgeon sanitize --fold-constants -o <ouput ONNX> <input ONNX>
+polygraphy surgeon sanitize <input ONNX> --fold-constants -o <ouput ONNX>
 ```
 
 ## Compile TensorRT engine
@@ -56,7 +56,11 @@ We use [polygraphy][polygraphy_git] to perform the TRT engine compilation, with 
 enabled.
 
 ```sh
-polygraphy convert --fp16 -o <output TRT engine> <input ONNX>
+# For TensorRT 8.6.
+polygraphy convert <input ONNX> --fp16 -o <output TRT engine>
+
+# For TensorRT 8.2 on Jetson with JetPack 4.6.x.
+polygraphy convert <input ONNX> --workspace=500M --fp16 -o <output TRT engine>
 ```
 
 ## Perform inference

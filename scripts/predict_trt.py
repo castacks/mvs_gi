@@ -1,16 +1,13 @@
-import time
 import os
 import sys
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
 import cv2
 import numpy as np
 import tensorrt as trt
+import time
 import pycuda.driver as cuda
-import pycuda.autoinit
-
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
-
-# from dsta_mvs.test.utils import *
+import pycuda.autoinit # This is needed for initializing CUDA driver.
 
 TRT_LOGGER = trt.Logger()
 
@@ -21,28 +18,21 @@ def load_engine(engine_file_path):
         return runtime.deserialize_cuda_engine(f.read())
 
 def main():
-    # dataloader = make_dataloader(
-    #     '/dataset/DSTA_MVS_Dataset_V2', # TODO set dataset directory
-    #     bf=96,
-    #     dist_list=[0.5, 1, 1.5, 2, 5, 10, 20, 30, 50, 100]
-    # )
 
-    # batch = next(iter(dataloader))
+    working_dir = 'code_release_202310_trt/artifacts_op13_gi/config103'
 
-    # imgs        = batch['imgs'].numpy()
-    # grids       = batch['grids'].numpy()
-    # masks       = batch['masks'].numpy()
+    sample = np.load( os.path.join( working_dir, 'test_sample.npz' ) )
+    imgs       = sample['imgs']
+    grids      = sample['grids']
+    grid_masks = sample['grid_masks']
+    masks      = sample['masks'] 
 
-    sample = np.load('test_output/test_sample.npz')
-    imgs = sample['imgs']
-    grids = sample['grids']
-    masks = sample['masks'] 
-
-    engine = load_engine('artifacts/model_backport.engine')
+    engine = load_engine( os.path.join( working_dir, 'model_backport_x86.engine' ) )
     context = engine.create_execution_context()
     
     imgs_bind_idx = engine.get_binding_index('imgs')
     grids_bind_idx = engine.get_binding_index('grids')
+    grid_masks_bind_idx = engine.get_binding_index('grid_masks')
     masks_bind_idx = engine.get_binding_index('masks') 
 
     # context.set_input_shape('imgs', imgs.shape)
@@ -54,6 +44,10 @@ def main():
     context.set_binding_shape(grids_bind_idx, grids.shape)
     grids_buf = np.ascontiguousarray(grids)
     grids_mem = cuda.mem_alloc(grids.nbytes)
+
+    context.set_binding_shape(grid_masks_bind_idx, grid_masks.shape)
+    grid_masks_buf = np.ascontiguousarray(grid_masks)
+    grid_masks_mem = cuda.mem_alloc(grid_masks.nbytes)
 
     # context.set_input_shape('masks', masks.shape)
     context.set_binding_shape(masks_bind_idx, masks.shape)
@@ -73,11 +67,17 @@ def main():
     stream = cuda.Stream()
     cuda.memcpy_htod_async(imgs_mem, imgs_buf, stream)
     cuda.memcpy_htod_async(grids_mem, grids_buf, stream)
+    cuda.memcpy_htod_async(grid_masks_mem, grid_masks_buf, stream)
     cuda.memcpy_htod_async(masks_mem, masks_buf, stream)
 
     # Single prediction save image
     context.execute_async_v2(
-        bindings=[int(imgs_mem), int(grids_mem), int(masks_mem), int(output_mem)],
+        bindings=[
+            int(imgs_mem), 
+            int(grids_mem), 
+            int(grid_masks_mem), 
+            int(masks_mem), 
+            int(output_mem)],
         stream_handle=stream.handle
     )
 
@@ -95,20 +95,28 @@ def main():
 
     # Normalize. TODO: fix range
     pred_min, pred_max = pred.min(), pred.max()
+    pred_min = max( 0.0, pred_min )
+    pred_max = min( 192, pred_max )
+
     pred = (pred.astype(np.float32) - pred_min) / ( pred_max - pred_min )
     pred = np.clip(pred, 0, 1) * 255
     pred = cv2.applyColorMap(pred.astype(np.uint8),cv2.COLORMAP_JET)
 
-    cv2.imwrite('test_output/trt_out.png', pred)
+    cv2.imwrite( os.path.join( working_dir, 'trt_out.png'), pred )
 
     # Timing
 
     elapsed_times = []
-    for i in range(101):
+    for _ in range(101):
             start = time.time()
             # output = session.run(['inv_dist'], {'imgs': imgs, 'grids': grids, 'masks': masks})
             context.execute_async_v2(
-                bindings=[int(imgs_mem), int(grids_mem), int(masks_mem), int(output_mem)],
+                bindings=[
+                    int(imgs_mem), 
+                    int(grids_mem), 
+                    int(grid_masks_mem),
+                    int(masks_mem), 
+                    int(output_mem)],
                 stream_handle=stream.handle
             )
 
