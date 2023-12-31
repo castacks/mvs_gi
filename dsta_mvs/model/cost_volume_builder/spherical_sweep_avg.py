@@ -49,6 +49,11 @@ class SphericalSweepStdMasked(nn.Module):
         cam_batched_masks = torch.flatten(masks, 0, 1)
         cam_batched_grids = torch.flatten(grids, 0, 1)
 
+        # 2023-12-23 by Yaoyu: Need to convert bool to int to make it possible to convert ONNX 
+        # opset 13 then TensorRT 8.2 for deployment on the Xavier NX with JetPack 4.6.1.
+        # if cam_batched_masks.dtype == torch.bool:
+        #     cam_batched_masks = cam_batched_masks.to(dtype=torch.float32)
+
         vol = []
 
         for i in range(X):

@@ -15,7 +15,7 @@ from ..model.mvs_model.torch_only import SphericalSweepStereoBase
 
 def make_dataloader(
         data_dir,
-        bf=95,
+        bf=96,
         dist_list=[0.5, 1, 1.5, 2, 5, 10, 20, 30, 50, 100],
         csv_rig_rgb_suffix='_rgb_equirect', # _rgb_fisheye
         csv_rig_dist_suffix='_dist_equirect' # _dist_fisheye
@@ -113,7 +113,7 @@ def make_dataloader(
 
 def make_dataloader_4cam(
         data_dir,
-        bf=95,
+        bf=96,
         dist_list=[0.5, 1, 1.5, 2, 5, 10, 20, 30, 50, 100],
         csv_rig_rgb_suffix='_rgb_equirect', # _rgb_fisheye
         csv_rig_dist_suffix='_dist_equirect' # _dist_fisheye
