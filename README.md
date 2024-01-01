@@ -68,7 +68,57 @@ __Update history__
 
 # Datasets
 
-(Coming soon)
+We created a new synthetic dataset with 3 fisheye cameras facing to the same direction. The data
+are collected by using the simulation environments provided by TartanAir V2, whichi itself is
+under development and will be released soon. We have a training set and a validation set. The
+total size is about 1.3T with the training set being 1.2T. There are 50 environments for the
+trainig set and 21 envrionments for the validation set. We made sure that there are no overlaps
+between them.
+
+The dataset is currentl hosted by our own server and we provide simple scripts for downloading.
+
+For the training set, first use the following commands to download the environment list and the
+downlaoding script.
+
+```bash
+wget https://airlab-share.andrew.cmu.edu:8081/MVS_Fisheye_Dataset/tar_list_train.txt
+wget https://airlab-share.andrew.cmu.edu:8081/MVS_Fisheye_Dataset/download_train.sh
+chmod +x download_train.sh
+```
+
+`tar_list_train.txt` is a list of envrionment names in the training set. The data size is also
+listed in this file. `download_train.sh` is the script for downloading the data. The user can
+inspect the script and augment it according to the use case. E.g., the user can comment out some
+environment names and only download a subset of data.
+
+```bash
+# To check if the URLs are all valid.
+./download_trah.sh check
+
+# To perform the download.
+./download_train.sh download
+```
+
+For the validation set, the procedure is the same. Use the following commands to download the
+environment list and the script first.
+
+```bash
+wget https://airlab-share.andrew.cmu.edu:8081/MVS_Fisheye_Dataset/tar_list_validate.txt
+wget https://airlab-share.andrew.cmu.edu:8081/MVS_Fisheye_Dataset/download_validate.sh
+chmod +x download_validate.sh
+```
+
+Then use the following to check and download the data.
+
+```bash
+# To check.
+./download_validate.sh check
+
+# To download.
+./download_validate.sh download
+```
+
+The structure of the dataset is the same with the sample dataset used in the [Offline validation instructions](docs/offline_validation/README.md). A separate documentation (coming soon) gives more details about the design of the dataset.
 
 # Paper (preprint)
 
