@@ -53,7 +53,7 @@ across the available hardware. For this reason, the process may take a long time
 configuration specific and must be performed on the target hardware.
 
 We use [polygraphy][polygraphy_git] to perform the TRT engine compilation, with `float16` conversion
-enabled.
+enabled. Note, `<output TRT engine>` must end with a `.engine` extension.
 
 ```sh
 # For TensorRT 8.6.
