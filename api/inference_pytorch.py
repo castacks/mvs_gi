@@ -11,6 +11,9 @@ if _TOP_PATH not in sys.path:
     for i, p in enumerate(sys.path):
         print(f'{i}: {p}')
 
+import copy
+import numpy as np
+
 import torch
 # torch.backends.cuda.matmul.allow_tf32 = False
 # torch.backends.cudnn.allow_tf32 = False
@@ -23,14 +26,57 @@ from .inference_class import InferenceProxy
 class InferencePytorch(InferenceProxy):
     def __init__(self, 
                  argv, 
-                 preprocessed_config = False,
+                 preprocessed_config=False,
+                 sample_input=False,
                  debug=False):
         super().__init__(argv=argv, preprocessed_config=preprocessed_config, debug=debug)
         
         # Get the model. Override parent's model member.
         self.model = self.get_model( 
             checkpoint_fn=InferenceProxy.find_checkpoint_from_argv(argv) )
-    
+        
+        self.sample_input = sample_input
+        self.map_samplers = None
+        if self.sample_input:
+            self.prepare_samplers()
+
+    def prepare_samplers(self):
+        # Copy the samplers from the dataset.
+        self.map_samplers = copy.deepcopy(self.dataloader.dataset.map_sampler)
+        # Push the samplers to GPU.
+        for _, sampler in self.map_samplers.items():
+            sampler.device = 'cuda'
+
+    # Override.
+    def preprocess_imgs(self, imgs):
+        if isinstance(imgs, torch.Tensor):
+            # NOTE: This is the debug branch.
+            t_imgs = imgs.cuda()
+        else:
+            if isinstance(imgs, list):
+                imgs = np.stack(imgs, axis=0)
+            # Convert the input from NumPy to Tensor.
+            t_imgs = torch.from_numpy(imgs).permute(0, 3, 1, 2).cuda().unsqueeze(0)
+            if t_imgs.dtype == torch.uint8:
+                t_imgs = t_imgs.float() / 255.0
+
+        if self.sample_input:
+            sampled_imgs = []
+
+            # NOTE: Assume batch size is always 1.
+            assert t_imgs.shape[0] == 1, f'Batch size must be 1. Got {t_imgs.shape[0]} instead. '
+            for i, img in enumerate(t_imgs[0, ...]):
+                key = f'cam{i}'
+                sampler = self.map_samplers[key]
+                # NOTE: The second return value is the mask.
+                sampled, _ = sampler(img)
+                # NOTE: sampler(img) returns the first tensor with the batch dimension.
+                sampled_imgs.append( sampled )
+
+            t_imgs = torch.cat(sampled_imgs, dim=0).unsqueeze(0)
+
+        return t_imgs
+        
     def get_model(self, **kwargs):
         '''
         kwargs must have "checkpoint_fn" key
