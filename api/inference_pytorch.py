@@ -20,14 +20,14 @@ from dsta_mvs.test.utils import make_dataloader
 
 from .inference_class import InferenceProxy
 
-class InferenceProxy(InferenceProxy):
+class InferencePytorch(InferenceProxy):
     def __init__(self, 
                  argv, 
                  preprocessed_config = False,
                  debug=False):
         super().__init__(argv=argv, preprocessed_config=preprocessed_config, debug=debug)
         
-        # Get the model.
+        # Get the model. Override parent's model member.
         self.model = self.get_model( 
             checkpoint_fn=InferenceProxy.find_checkpoint_from_argv(argv) )
     
@@ -56,15 +56,22 @@ class InferenceProxy(InferenceProxy):
 
         model.dist_regressor = ckpt['hyper_parameters']['dist_regressor']
 
+        # Override model configurations that are changed during validation w.r.t. training.
+        model_init_args = self.raw_cfg['model']['init_args']
+        model.re_configure( val_loader_names=model_init_args['val_loader_names'],
+                            visualization_range=model_init_args['visualization_range'],
+                            val_offline_flag=model_init_args['val_offline_flag'],
+                            val_custom_step=model_init_args['val_custom_step'] )
+
         model.eval()
         model.cuda()
 
         return model
     
     def inference(self, imgs, input_dict=None):
-        return self.model( { 
-            'imgs': imgs,
-            'grids': self.grids,
-            'grid_masks': self.grid_masks,
-            'masks': self.masks
-        } )
+        return self.model( 
+            imgs=imgs,
+            grids=self.grids,
+            grid_masks=self.grid_masks,
+            masks=self.masks
+        )

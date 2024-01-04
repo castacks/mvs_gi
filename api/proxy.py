@@ -1,6 +1,5 @@
 import os
 import sys
-from typing import Any, List
 
 # The path of the current Python script.
 _CURRENT_PATH       = os.path.dirname(os.path.realpath(__file__))
@@ -11,6 +10,7 @@ if _TOP_PATH not in sys.path:
     for i, p in enumerate(sys.path):
         print(f'{i}: {p}')
 
+from typing import Any, List
 from jsonargparse import ArgumentParser
 
 # import torch
@@ -19,6 +19,7 @@ from jsonargparse import ArgumentParser
 
 # Local packages.
 # from dsta_mvs.model.globals import GLOBAL
+import dsta_mvs
 from dsta_mvs.mvs_utils import debug as mvs_debug
 from dsta_mvs.mvs_utils.file_sys import get_filename_parts
 
@@ -51,7 +52,7 @@ class ProxyBase(object):
             self.cfg, self.raw_cfg = self.parse_commandline_without_preprocessing(argv)
         else:
             self.cfg, self.raw_cfg = self.parse_commandline(argv)
-
+        
         # # Handle global settings.
         # self.handle_global_settings()
 
@@ -208,8 +209,8 @@ class ProxyBase(object):
         
         # parser.add_class_arguments(Trainer, 'trainer')
         parser.add_argument('--data', type=Any)
-        parser.add_argument('--model', type=Any)
-        parser.add_argument('--optimizer', type=Any)
+        parser.add_argument('--model', type=dsta_mvs.model.mvs_model.spherical_sweep_stereo.SphericalSweepStereo)
+        # parser.add_argument('--optimizer', type=Any)
         
         raw_cfg = parser.parse_path(fn)
         cfg = parser.instantiate_classes(raw_cfg)
@@ -218,7 +219,7 @@ class ProxyBase(object):
 
     @staticmethod
     def parse_commandline(argv: List[str]):
-        argv = ProxyBase.preprocess_args(sys.argv[1:])
+        argv = ProxyBase.preprocess_args(argv)
         args = ProxyBase.parse_args_round_1(argv)
         cfg, raw_cfg = ProxyBase.parse_args_from_config(args.config)
         return cfg, raw_cfg
