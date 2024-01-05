@@ -32,6 +32,8 @@ class DatasetProxy(ProxyBase):
         self.df = self.raw_cfg['data']['init_args']['bf']
         self.dataset = self.get_dummy_dataloader(self.raw_cfg['data']).dataset
 
+        # TODO: explicitly release the model such that the GPU memory can be released.
+
     def get_dummy_dataloader(self, data_config):
         data_config = data_config['init_args']
         main_data_dir_dict = data_config['data_dirs']['main']
