@@ -41,6 +41,12 @@ def tensor_2_cv2_img(tensor):
     img = ( torch.clamp(tensor.detach(), 0, 1) * 255 ).permute( 0, 2, 3, 1).to('cpu').numpy()
     return img.astype(np.uint8)
 
+def tensor_CHW_2_cv2_img(tensor):
+    '''Assuming that tensor is in CHW format.
+    '''
+    img = ( torch.clamp(tensor.detach(), 0, 1) * 255 ).permute( 1, 2, 0).to('cpu').numpy()
+    return img.astype(np.uint8)
+
 def multi_view_tensor_2_cv2_img(tensor):
     '''Assuming that tensor has a shape of [B, X, C, H, W] with X being the number of views.
     '''
