@@ -19,8 +19,6 @@ import torch
 # torch.backends.cudnn.allow_tf32 = False
 
 # Local packages.
-from dsta_mvs.test.utils import make_dataloader
-
 from .inference_class import InferenceProxy
 
 class InferencePytorch(InferenceProxy):
@@ -115,9 +113,10 @@ class InferencePytorch(InferenceProxy):
         return model
     
     def inference(self, imgs, input_dict=None):
-        return self.model( 
-            imgs=imgs,
-            grids=self.grids,
-            grid_masks=self.grid_masks,
-            masks=self.masks
-        )
+        with torch.no_grad():
+            return self.model( 
+                imgs=imgs,
+                grids=self.grids,
+                grid_masks=self.grid_masks,
+                masks=self.masks
+            )
