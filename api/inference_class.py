@@ -51,6 +51,33 @@ class InferenceProxy(ProxyBase, ABC):
     def dataloader(self):
         return self.dummy_dataloader
     
+    def load_grids_from_file(self, fn):
+        '''This function is used to load the grids from a file. It is used for deploying the
+        model on a robot that do not have a desktop grade GPU and the floating point values
+        of grids might be different when generated on the robot. This small difference can still
+        cause visible errors in the final output. So we should save the grids on a desktop 
+        computer and load the file on the robot.
+        
+        Supports PyTorch saved tensors with extension .pth and NumPy saved array with
+        extension .npy or .npz. It is assumed that when saves as .pth and .npz files, there
+        is a key named 'grids' in the loaded file.
+        '''
+
+        if fn.endswith('.pth'):
+            grids = torch.load(fn)['grids']
+        elif fn.endswith('.npy'):
+            grids = torch.from_numpy( np.load(fn) )
+        elif fn.endswith('.npz'):
+            grids = torch.from_numpy( np.load(fn)['grids'] )
+        else:
+            raise NotImplementedError(f'Unsupported file extension: {fn}')
+
+        assert torch.equal(grids.shape, self.grids.shape), \
+            f'The loaded grids must have the same shape as the internal grids. '\
+            f'Loaded grids shape: {grids.shape}, internal grids shape: {self.grids.shape}. '
+
+        self.grids = grids.cuda()
+
     def get_dummy_dataloader(self, data_config):
         data_config = data_config['init_args']
         main_data_dir_dict = data_config['data_dirs']['main']
