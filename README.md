@@ -49,16 +49,20 @@ Table: TensorRT model performance.
 |------------|----------------------|---------------|------------------------|------------------|------------------|
 | G16V       | x86_64               | >=8.6.1       | GTX1070MQ<br>RTX3080Ti | 73<br>6          | 400<br>500       |
 | G16V       | Jetson JetPack 4.6.x | 8.2.x         | Jetson Xavier NX       | 160              | 2100             |
+| G16V       | Jetson JetPack 5.1.2 | 8.5.2         | Jetson AGX Xavier      | 104              | 500              |
 | G16VV      | x86_64               | >=8.6.1       | GTX1070MQ<br>RTX3080Ti | 210<br>11        | 800<br>710       |
 | G16VV      | Jetson JetPack 4.6.x | 8.2.x         | Jetson Xavier NX       | 270              | 1800             |
+| G16VV      | Jetson JetPack 5.1.2 | 8.5.2         | Jetson AGX Xavier      | 200              | 600              |
 
 Table: Optimized model links.
-| Model name | Opt. Ver.               | Link                                                                                                                |
-|------------|-------------------------|---------------------------------------------------------------------------------------------------------------------|
-| G16V       | ONNX, Operation Set 13  | [download](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/onnx_tensorrt/config29_WB_zslyi5q8_v130_sanitized.onnx)  |
-| G16V       | TensorRT 8.2, Xavier NX | [downlaod](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/onnx_tensorrt/config29_WB_zslyi5q8_v130_jp4.6.1.engine)  |
-| G16VV      | ONNX, Operation Set 13  | [download](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/onnx_tensorrt/config103_WB_jy2dqg6r_v102_sanitized.onnx) |
-| G16VV      | TensorRT 8.2, Xavier NX | [download](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/onnx_tensorrt/config103_WB_jy2dqg6r_v102_jp4.6.1.engine) |
+| Model name | Opt. Ver.                  | Link                                                                                                                |
+|------------|----------------------------|---------------------------------------------------------------------------------------------------------------------|
+| G16V       | ONNX, Operation Set 13     | [download](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/onnx_tensorrt/config29_WB_zslyi5q8_v130_sanitized.onnx)  |
+| G16V       | TensorRT 8.2, Xavier NX    | [downlaod](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/onnx_tensorrt/config29_WB_zslyi5q8_v130_jp4.6.1.engine)  |
+| G16V       | TensorRT 8.5.2, AGX Xavier | [download](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/onnx_tensorrt/config29_WB_zslyi5q8_v130_jp5.1.2.engine)  |
+| G16VV      | ONNX, Operation Set 13     | [download](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/onnx_tensorrt/config103_WB_jy2dqg6r_v102_sanitized.onnx) |
+| G16VV      | TensorRT 8.2, Xavier NX    | [download](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/onnx_tensorrt/config103_WB_jy2dqg6r_v102_jp4.6.1.engine) |
+| G16VV      | TensorRT 8.5.2, AGX Xavier | [download](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/onnx_tensorrt/config103_WB_jy2dqg6r_v102_jp5.1.2.engine) |
 
 __Update history__
 - 2023-12-31: G16V ( was config21 in the paper, now config29, need update paper )
