@@ -31,6 +31,6 @@ class SphericalSweepStereoBase(nn.Module):
         feats = self.extract_features(imgs)
         vol = self.cv_builder(feats, grids, grid_masks, masks)
         costs = self.cv_regulator(vol)
-        inv_dist = self.dist_regressor(costs)
+        inv_dist, norm_costs = self.dist_regressor(costs)
 
-        return inv_dist
+        return inv_dist, norm_costs

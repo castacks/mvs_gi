@@ -177,6 +177,7 @@ class SphericalSweepStereo(SphericalSweepStereoBase, pl.LightningModule):
 
         # Compute volume loss
         # TODO: Interpolation shouldn't have to be done manually here.
+        # Looks like a bug. The dist_regressor also performs interpolation and softmax. 2024-01-15.
         costs_ = costs[:, 0, ...]
         if ( self.dist_regressor.pre_interp and self.dist_regressor.interp_scale_factor > 0 ):
             costs_ = F.interpolate(
@@ -189,7 +190,7 @@ class SphericalSweepStereo(SphericalSweepStereoBase, pl.LightningModule):
         loss['vol_loss'] = self.volume_loss(norm_costs, labels)
 
         # Regression for outputs.
-        inv_dist = self.dist_regressor(costs)
+        inv_dist, _ = self.dist_regressor(costs)
 
         forward_time = time.time()
 
@@ -262,7 +263,7 @@ class SphericalSweepStereo(SphericalSweepStereoBase, pl.LightningModule):
         costs = self.cv_regulator(vol)
 
         # Regression for outputs.
-        inv_dist = self.dist_regressor(costs)
+        inv_dist, _ = self.dist_regressor(costs)
         
         # Memory and time measurement.
         if self.val_offline_flag:

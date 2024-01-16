@@ -1,0 +1,22 @@
+trainer:
+  accelerator: gpu
+  num_nodes: 1
+  strategy: ddp
+  max_epochs: 1000
+  logger:
+    class_path: WandbLogger
+    init_args:
+      project: dsta-mvs-sweep
+      name: sweep@exp_name
+      log_model: all
+      save_dir: wandb_logs_2024
+  callbacks:
+    - class_path: ModelCheckpoint
+      init_args:
+        save_top_k: -1    # save every model
+        every_n_epochs: 1 # save every epoch
+    - class_path: dsta_mvs.lightning_callback.TrainingValidationVis
+      init_args:
+        label_vis_min: 0.5 
+        label_vis_max: 100
+        step_span: 100

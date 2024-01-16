@@ -61,13 +61,15 @@ class DistanceRegressorWithFixedCandidates(nn.Module):
 
         norm_costs = F.softmax(distance_cost, 1)
         
-        if ( not self.pre_interp and self.interp_scale_factor > 0 ):
-            norm_costs = F.interpolate(
-                norm_costs, 
-                size=None,
-                scale_factor=self.interp_scale_factor,
-                mode='nearest'
-            )
+        # This does not look right, dist_cost has been interpolated alrady.
+        # Comment out the following block of code on 2024-01-15 by Yaoyu
+        # if ( not self.pre_interp and self.interp_scale_factor > 0 ):
+        #     norm_costs = F.interpolate(
+        #         norm_costs, 
+        #         size=None,
+        #         scale_factor=self.interp_scale_factor,
+        #         mode='nearest'
+        #     )
 
         inv_depths = torch.sum(
             norm_costs * self.inv_dist_idx.expand_as(norm_costs),
@@ -75,4 +77,4 @@ class DistanceRegressorWithFixedCandidates(nn.Module):
             keepdim=True
         )
 
-        return inv_depths
+        return inv_depths, norm_costs

@@ -1,0 +1,5 @@
+# Pi.
+sweep@pi: 3.141592653589793
+sweep@pi_half: 1.5707963267948966
+sweep@pi_half_negative: -1.5707963267948966
+sweep@pi_latitude_span: [ -1.5707963267948966, 0 ]

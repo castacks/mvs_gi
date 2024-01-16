@@ -1,0 +1,14 @@
+data:
+  class_path: dsta_mvs.support.datamodule.MVSLocalDataModule2024
+  init_args:
+    bf: 96
+    dist_list: "sweep@dist_list"
+    data_dirs: "configs/base_data_dirs.yaml"
+    shuffle_train: True
+    shuffle_val: False
+    num_workers: 16
+    conf_additional_camera_model:
+      cv: "configs/dataset/cam_model_cv.yaml"
+    conf_map_surrogate_camera_model: "configs/dataset/surrogate_models_3cam.yaml"
+    map_camera_frame: "configs/dataset/map_cam_frame_3cam_with_surrogate_input.yaml"
+    
