@@ -151,3 +151,5 @@ job-*.err
 *_local_*.*
 *.DS_Store
 */**/.DS_Store
+
+wandb_logs*/
