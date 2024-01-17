@@ -94,18 +94,6 @@ class SphericalSweepStereo2024(pl.LightningModule):
         for _, v in self.val_depth_pred_keys.items():
             wb.define_metric(v, step_metric=self.val_custom_step_name)
 
-    def assign_dataset_indexed_cam_models(self, dataset_indexed_cam_models: list):
-        '''dataset_indexed_cam_models is a list of dicts of camera models. The keys of the dict 
-        are "cam0" to "camN". And there is a "rig" camera.
-        '''
-        self.dataset_indexed_cam_models = []
-        assert isinstance(dataset_indexed_cam_models, list)
-        for i, cam_models in enumerate( dataset_indexed_cam_models ):
-            assert isinstance(cam_models, dict)
-            assert 'rig' in cam_models.keys(), \
-                f'i={i}, cam_models does not have a "rig" key. keys = {cam_models.keys()}'
-            self.dataset_indexed_cam_models.append( cam_models )
-
     def training_step(self, batch, batch_idx):
         step_start_time = time.time()
         
@@ -149,10 +137,10 @@ class SphericalSweepStereo2024(pl.LightningModule):
         # Update the last start time.
         self.last_start_time = step_start_time
 
-        return {
-            'loss': loss,
-            'inv_dist': inv_dist,
-        }
+        res = loss
+        res['inv_dist'] = inv_dist
+
+        return res
 
     def validation_step(self, batch, batch_idx, dataloader_idx:int = 0):
         if self.val_offline_flag:
@@ -195,8 +183,8 @@ class SphericalSweepStereo2024(pl.LightningModule):
         metrics = dict()
         if compute_metrics:
 
-            inv_dist_idx_min = self.dist_regressor.inv_dist_idx_min
-            inv_dist_idx_max = self.dist_regressor.inv_dist_idx_max
+            inv_dist_idx_min = self.mvs_model.dist_regressor.inv_dist_idx_min
+            inv_dist_idx_max = self.mvs_model.dist_regressor.inv_dist_idx_max
 
             if batch_idx > 1:
                 # Ignore the first two steps where time span tend to be longer.
@@ -216,10 +204,17 @@ class SphericalSweepStereo2024(pl.LightningModule):
         if not self.val_offline_flag:
             # This happens during training.
             # metrics is logged here.
+            # self.log_dict( metrics, 
+            #                prog_bar=False, 
+            #                logger=True, 
+            #                on_step=True, 
+            #                on_epoch=False, 
+            #                sync_dist=False )
+            
             self.log_dict( metrics, 
                            prog_bar=False, 
                            logger=True, 
-                           on_step=True, 
+                           on_step=False, 
                            on_epoch=True, 
                            sync_dist=True )
             # Visualizations are logged in the callback.

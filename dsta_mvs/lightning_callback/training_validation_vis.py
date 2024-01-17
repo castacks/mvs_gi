@@ -3,6 +3,7 @@ from typing import Any, Dict
 
 import copy
 import cv2
+from lightning import LightningModule, Trainer
 import numpy as np
 import re
 import wandb
@@ -90,10 +91,37 @@ class TrainingValidationVis(Callback):
         
         self.val_loader_names = pl_module.val_loader_names
         self.val_depth_pred_keys = pl_module.val_depth_pred_keys
-        
-        self.dataset_indexed_cam_models = pl_module.dataset_indexed_cam_models
     
-    def on_train_batch_end(self, outputs, batch, batch_idx):
+    def setup_dataset_indexed_cam_models(self, trainer: Trainer):
+        if self.dataset_indexed_cam_models is not None:
+            return
+        
+        if trainer.val_dataloaders is None:
+            return
+        
+        self.dataset_indexed_cam_models = []
+        for i, val_dataloader in enumerate( trainer.val_dataloaders ):
+            val_dataset = val_dataloader.dataset
+            
+            assert 'rig' in val_dataset.map_camera_model.keys(), \
+                f'TrainingValidationVis: setup: '\
+                f'i={i}, map_camera_model does not have a "rig" key. '\
+                f'keys = {val_dataset.map_camera_model.keys()}'
+            
+            self.dataset_indexed_cam_models.append(
+                copy.deepcopy( val_dataset.map_camera_model )
+            )
+    
+    def on_fit_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
+        self.setup_dataset_indexed_cam_models(trainer)
+    
+    def on_train_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
+        self.setup_dataset_indexed_cam_models(trainer)
+    
+    def on_validation_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
+        self.setup_dataset_indexed_cam_models(trainer)
+    
+    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
         imgs     = batch['imgs']
         labels   = batch['inv_dist_idx']
         inv_dist = outputs['inv_dist']
@@ -104,7 +132,7 @@ class TrainingValidationVis(Callback):
                             key='depth_prediction_train', 
                             images=[vis] )
 
-    def on_validation_batch_end(self, outputs, batch, batch_idx, dataloader_idx):
+    def on_validation_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
         imgs     = batch['imgs']
         inv_dist = outputs['inv_dist']
         
