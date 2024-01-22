@@ -16,8 +16,8 @@ from ..common import common_modules as cm
 class UNetCostVolumeRegulatorBase(nn.Module):
     def __init__(
         self, 
-        in_chs: int=16,
-        f_int_chs: int=32, # The first intermediate channels in the UNet.
+        in_chs: int=16, #might need to change 
+        f_int_chs: int=32, # The first intermediate channels in the UNet. #might need to change
         final_chs: int=1,
         u_depth: int=3,
         blk_width: int=4,

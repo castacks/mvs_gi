@@ -1,7 +1,7 @@
 from torch import nn, Tensor
 import torch.nn.functional as F
 
-class SphericalSweepStereoBase(nn.Module):
+class SphericalSweepStereoBaseCopy(nn.Module):
     def __init__(
         self,
         feature_extractor: nn.Module,
