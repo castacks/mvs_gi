@@ -149,3 +149,7 @@ job-*.err
 *.png
 *_local.*
 *_local_*.*
+*.DS_Store
+*/**/.DS_Store
+
+wandb_logs*/

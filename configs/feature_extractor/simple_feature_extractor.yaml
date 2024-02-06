@@ -1,0 +1,9 @@
+class_path: dsta_mvs.model.feature_extractor.SimpleFeatExtraction
+init_args:
+  in_size: [512, 2048]
+  in_chs: 3
+  chs: 16
+  k_sz: 3
+  layers: [5, 10]
+  norm_type: "batch"
+  relu_type: "leaky"

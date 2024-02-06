@@ -1,0 +1,4 @@
+optimizer:
+  class_path: Adam
+  init_args:
+    lr: 0.0001
