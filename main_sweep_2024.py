@@ -65,7 +65,7 @@ def preprocess_args(argv: List[str]) -> str:
     
     config_name = construct_config_on_filesystem(
         argv,
-        top_level_single_key='fit',
+        top_level_single_key=None,
         name_config_base=name_config_base,
         name_config_sweep=name_config_sweep,
         name_config_name=name_config_name )
