@@ -94,9 +94,11 @@ class TrainingValidationVis(Callback):
     
     def setup_dataset_indexed_cam_models(self, trainer: Trainer):
         if self.dataset_indexed_cam_models is not None:
+            # Already set up.
             return
         
         if trainer.val_dataloaders is None:
+            # No need to set up.
             return
         
         self.dataset_indexed_cam_models = []
@@ -122,15 +124,18 @@ class TrainingValidationVis(Callback):
         self.setup_dataset_indexed_cam_models(trainer)
     
     def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
+        if batch_idx % self.step_span != 0:
+            # Only create visualization at fixed intervals.
+            return
+        
         imgs     = batch['imgs']
         labels   = batch['inv_dist_idx']
         inv_dist = outputs['inv_dist']
         
-        if batch_idx % self.step_span == 0:
-            vis = self._create_vis(imgs, inv_dist, labels)
-            self.logger.log_image(
-                            key='depth_prediction_train', 
-                            images=[vis] )
+        vis = self._create_vis(imgs, inv_dist, labels)
+        self.logger.log_image(
+                        key='dist_prediction_train', 
+                        images=[vis] )
 
     def on_validation_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
         imgs     = batch['imgs']

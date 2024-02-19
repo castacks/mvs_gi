@@ -23,10 +23,12 @@ class ImageAugmentation(nn.Module):
         self.transform = transform
 
     @torch.no_grad()
-    def forward(self, batch:Tuple[Tensor, Tensor, Tensor]) -> Tuple[Tensor, Tensor, Tensor]:
-        imgs, grids, masks = batch
+    def forward(self, 
+                batch:Tuple[Tensor, Tensor, Tensor, Tensor]
+                ) -> Tuple[Tensor, Tensor, Tensor, Tensor]:
+        imgs, grids, grid_masks, masks = batch
         imgs = apply_to_multiview(self.transform, imgs)
-        return (imgs, grids, masks)
+        return (imgs, grids, grid_masks, masks)
     
 class ColorJiggle(ImageAugmentation):
     def __init__(self, *args, **kwargs):

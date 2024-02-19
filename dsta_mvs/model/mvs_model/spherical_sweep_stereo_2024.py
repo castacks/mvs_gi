@@ -1,6 +1,5 @@
 from typing import Any, Tuple, Optional, Mapping
 
-import re
 import time
 
 import torch
@@ -24,6 +23,7 @@ class SphericalSweepStereo2024(pl.LightningModule):
         volume_loss: nn.Module,
         distance_loss: nn.Module,
         loss_weights: Tuple[float, float], # volume, dist
+        distance_loss_label_max: float=191.0,
         val_offline_flag: bool=False,
         val_custom_step: bool=False
     ):
@@ -42,6 +42,7 @@ class SphericalSweepStereo2024(pl.LightningModule):
         self.volume_loss = volume_loss # VolumeCrossEntropy(bf, dist_list)
         self.distance_loss = distance_loss # nn.SmoothL1Loss()
         self.loss_weights = loss_weights
+        self.distance_loss_label_max = distance_loss_label_max
 
         self.last_start_time = None
         
@@ -95,6 +96,7 @@ class SphericalSweepStereo2024(pl.LightningModule):
             wb.define_metric(v, step_metric=self.val_custom_step_name)
 
     def training_step(self, batch, batch_idx):
+        timing=dict()
         step_start_time = time.time()
         
         imgs        = batch['imgs']
@@ -104,41 +106,42 @@ class SphericalSweepStereo2024(pl.LightningModule):
         masks       = batch['masks']
 
         # Data augmentation
-        # TODO: Check if we need to use grid_masks.
-        imgs, grids, masks = self.augmentation((imgs, grids, masks))
+        imgs, grids, grid_masks, masks = \
+            self.augmentation((imgs, grids, grid_masks, masks))
 
         # Forward.
         forward_start_time = time.time()
         inv_dist, norm_costs = self.mvs_model(imgs, grids, grid_masks, masks)
         forward_end_time = time.time()
+        timing["forward_duration"] = forward_end_time - forward_start_time
 
-        # Compute volume loss.
+        loss_mask = labels <= self.distance_loss_label_max
         loss = dict()
-        loss['vol_loss'] = self.volume_loss(norm_costs, labels)
+        
+        # Compute volume loss.
+        loss['vol_loss'] = self.volume_loss(norm_costs, labels, mask=loss_mask)
         
         # Compute distance loss.
-        loss_mask = labels <= 191 # TODO: Hard coded.
         loss['distance_loss'] = self.distance_loss(inv_dist, labels, mask=loss_mask)
 
         # Combined loss
+        # TODO: Use dict instead of list for loss_weights.
         loss['loss'] = self.loss_weights[0] * loss['vol_loss'] \
                      + self.loss_weights[1] * loss['distance_loss']
-        
         self.log_dict(loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
         
-        timing=dict()
-        timing["forward_duration"] = forward_end_time - forward_start_time
+        # Prepare the return value.
+        res = loss
+        res['inv_dist'] = inv_dist
 
+        # Log the timing.
         if self.last_start_time is not None:
             timing["iter_duration"] = step_start_time - self.last_start_time
 
         self.log_dict(timing, prog_bar=False, logger=True, on_step=False, on_epoch=True)
-
+        
         # Update the last start time.
         self.last_start_time = step_start_time
-
-        res = loss
-        res['inv_dist'] = inv_dist
 
         return res
 
