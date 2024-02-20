@@ -49,7 +49,7 @@ class TrainingValidationVis(Callback):
     def __init__(self, 
                  label_vis_min: float, 
                  label_vis_max: float,
-                 step_span: int=100,
+                 step_span: int=1000,
                  ):
         super().__init__()
         self.label_vis_min = label_vis_min
