@@ -235,6 +235,7 @@ class RealTimeSphereSweepWrapper(pl.LightningModule):
             images = list()
             # print("########################")
             for i, img in enumerate(imgs):
+                # TODO: Might be a bug. img is already a tensor in shape of [1, H, W, C].
                 img_permuted = img.permute((0,3,1,2))
                 samplers[i].device = img.device
                 img_sampled, valid_mask = samplers[i](img_permuted.float())
@@ -245,6 +246,11 @@ class RealTimeSphereSweepWrapper(pl.LightningModule):
                 # print(img_sampled.shape)
 
                 img_sampled = torch.where(valid_mask, img_sampled, torch.tensor([0.0],device=img_sampled.device))
+
+                # TODO: this might be a bug. From runtime debugging, imgs is a list of tensors that
+                # are not normlized to [0, 1]. So currently the following line is fine.
+                # However, to be safe, we should properly clip and re-scale to [0, 255] before 
+                # converting to uint8.
                 images.append(img_sampled.squeeze(0).cpu().detach().numpy().astype(np.uint8))
 
         else:
