@@ -20,17 +20,24 @@ For the developers, [here](docs/original_home_page_readme/README.md) is the orig
 
 (More details coming soon)
 
+[//]: # (This is a comment line, see https://stackoverflow.com/questions/4823468/comments-in-markdown)
+[//]: # (The mvs_gi_download link.)
+
+[mvs_gi_download_link]: https://github.com/castacks/mvs_gi_download
+
 ## PyTorch models ##
 Pre-trained models (need associated configs):
 
-| Model name | Link                                                                                                                            |
-|------------|---------------------------------------------------------------------------------------------------------------------------------|
-| E8         | [download](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/pre_trained_models/E8/dsta_sweep_config24_WB_jbektzh2_v122.ckpt)     |
-| G8         | [download](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/pre_trained_models/G8/dsta_sweep_config25_WB_koju4sfh_v140.ckpt)     |
-| E16        | [download](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/pre_trained_models/E16/dsta_sweep_config19_WB_zdtldl4s_v96.ckpt)     |
-| G16        | [download](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/pre_trained_models/G16/dsta_sweep_config20_WB_f6tysxvk_v93.ckpt)     |
-| G16V       | [download](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/pre_trained_models/G16V/dsta_sweep_config21_WB_a7kccavm_v59.ckpt)    |
-| G16VV      | [download](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/pre_trained_models/G16VV/dsta_sweep_config103_WB_jy2dqg6r_v102.ckpt) |
+Updated on 2024-09-05: Please refer to [mvs_gi_download][mvs_gi_download_link] for the download instructions.
+
+| Model name | Link                                    |
+|------------|-----------------------------------------|
+| E8         | [mvs_gi_download][mvs_gi_download_link] |
+| G8         | [mvs_gi_download][mvs_gi_download_link] |
+| E16        | [mvs_gi_download][mvs_gi_download_link] |
+| G16        | [mvs_gi_download][mvs_gi_download_link] |
+| G16V       | [mvs_gi_download][mvs_gi_download_link] |
+| G16VV      | [mvs_gi_download][mvs_gi_download_link] |
 
 __Update history__
 - 2023-12-31: G16V ( two versions used in various places, need to add config29 )
@@ -55,22 +62,24 @@ Table: TensorRT model performance.
 | G16VV      | Jetson JetPack 5.1.2 | 8.5.2         | Jetson AGX Xavier      | 200              | 600              |
 | G16VV      | Jetson Jetpack 5.0.2 | 8.4.1         | Jetson AGX Orin        | 65               | 1900             |
 
-Table: Optimized model links.
-| Model name | Opt. Ver.                  | Link                                                                                                                |
-|------------|----------------------------|---------------------------------------------------------------------------------------------------------------------|
-| G16V       | ONNX, Operation Set 13     | [download](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/onnx_tensorrt/config29_WB_zslyi5q8_v130_sanitized.onnx)  |
-| G16V       | TensorRT 8.2, Xavier NX    | [downlaod](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/onnx_tensorrt/config29_WB_zslyi5q8_v130_jp4.6.1.engine)  |
-| G16V       | TensorRT 8.5.2, AGX Xavier | [download](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/onnx_tensorrt/config29_WB_zslyi5q8_v130_jp5.1.2.engine)  |
-| G16VV      | ONNX, Operation Set 13     | [download](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/onnx_tensorrt/config103_WB_jy2dqg6r_v102_sanitized.onnx) |
-| G16VV      | TensorRT 8.2, Xavier NX    | [download](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/onnx_tensorrt/config103_WB_jy2dqg6r_v102_jp4.6.1.engine) |
-| G16VV      | TensorRT 8.5.2, AGX Xavier | [download](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/onnx_tensorrt/config103_WB_jy2dqg6r_v102_jp5.1.2.engine) |
-| G16VV      | TensorRT 8.4.1, AGX Orin   | [download](https://airlab-share.andrew.cmu.edu:8081/mvs_gi/onnx_tensorrt/config103_WB_jy2dqg6r_v102_jp5.0.2.engine) |
+Table: Optimized model links. Updated on 2024-09-05: Please refer to [mvs_gi_download][mvs_gi_download_link] for the download instructions.
+
+| Model name | Opt. Ver.                  |Filename                                   | Link                                    |
+|------------|----------------------------|-------------------------------------------|-----------------------------------------|
+| G16V       | ONNX, Operation Set 13     | config29_WB_zslyi5q8_v130_sanitized.onnx  | [mvs_gi_download][mvs_gi_download_link] |
+| G16V       | TensorRT 8.2, Xavier NX    | config29_WB_zslyi5q8_v130_jp4.6.1.engine  | [mvs_gi_download][mvs_gi_download_link] |
+| G16V       | TensorRT 8.5.2, AGX Xavier | config29_WB_zslyi5q8_v130_jp5.1.2.engine  | [mvs_gi_download][mvs_gi_download_link] |
+| G16VV      | ONNX, Operation Set 13     | config103_WB_jy2dqg6r_v102_sanitized.onnx | [mvs_gi_download][mvs_gi_download_link] |
+| G16VV      | TensorRT 8.2, Xavier NX    | config103_WB_jy2dqg6r_v102_jp4.6.1.engine | [mvs_gi_download][mvs_gi_download_link] |
+| G16VV      | TensorRT 8.5.2, AGX Xavier | config103_WB_jy2dqg6r_v102_jp5.1.2.engine | [mvs_gi_download][mvs_gi_download_link] |
+| G16VV      | TensorRT 8.4.1, AGX Orin   | config103_WB_jy2dqg6r_v102_jp5.0.2.engine | [mvs_gi_download][mvs_gi_download_link] |
 
 __Update history__
 - 2023-12-31: G16V ( was config21 in the paper, now config29, need update paper )
+- 2024-09-05: Paper updated after peer review.
 
 [//]: # (This is a comment line, see https://stackoverflow.com/questions/4823468/comments-in-markdown)
-[//]: # (The above TensorRT table is saved at https://drive.google.com/drive/folders/18TTxTwLSsJrnlKawxWXw1eybwctOKNRa?usp=drive_link)
+[//]: # (The above TensorRT table is saved at https://drive.google.com/drive/folders/18TTxTwLSsJrnlKawxWXw1eybwctOKNRa?usp=drive_link . However, it's outdated. )
 
 # Datasets
 
@@ -83,46 +92,7 @@ between them.
 
 The dataset is currentl hosted by our own server and we provide simple scripts for downloading.
 
-For the training set, first use the following commands to download the environment list and the
-downlaoding script.
-
-```bash
-wget https://airlab-share.andrew.cmu.edu:8081/MVS_Fisheye_Dataset/tar_list_train.txt
-wget https://airlab-share.andrew.cmu.edu:8081/MVS_Fisheye_Dataset/download_train.sh
-chmod +x download_train.sh
-```
-
-`tar_list_train.txt` is a list of envrionment names in the training set. The data size is also
-listed in this file. `download_train.sh` is the script for downloading the data. The user can
-inspect the script and augment it according to the use case. E.g., the user can comment out some
-environment names and only download a subset of data.
-
-```bash
-# To check if the URLs are all valid.
-./download_trah.sh check
-
-# To perform the download.
-./download_train.sh download
-```
-
-For the validation set, the procedure is the same. Use the following commands to download the
-environment list and the script first.
-
-```bash
-wget https://airlab-share.andrew.cmu.edu:8081/MVS_Fisheye_Dataset/tar_list_validate.txt
-wget https://airlab-share.andrew.cmu.edu:8081/MVS_Fisheye_Dataset/download_validate.sh
-chmod +x download_validate.sh
-```
-
-Then use the following to check and download the data.
-
-```bash
-# To check.
-./download_validate.sh check
-
-# To download.
-./download_validate.sh download
-```
+Updated on 2024-09-05: Please refer to [mvs_gi_download][mvs_gi_download_link] for the download instructions.
 
 The structure of the dataset is the same with the sample dataset used in the [Offline validation instructions](docs/offline_validation/README.md). A separate documentation (coming soon) gives more details about the design of the dataset.
 
